@@ -40,7 +40,7 @@
 
 ## 在线预览
 
-> 部署后替换为你的 Pages 地址：https://<用户名>.github.io/NaiWaPixel/
+> 在线预览：https://KBCWHY.github.io/NaiWaPixel/
 
 ## 本地构建
 
