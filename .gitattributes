@@ -1,0 +1,4 @@
+# 强制以 LF 换行存储文本文件。
+# 关键原因：index.html 内含 CSP 对 <script> 的 sha256 校验，若文件被存成 CRLF，
+# 可能导致浏览器校验失败、页面白屏。统一 LF 可彻底规避该风险。
+* text=auto eol=lf

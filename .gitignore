@@ -1,0 +1,20 @@
+# 依赖
+node_modules/
+
+# 与本站无关的本地项目
+AdShield/
+proto/
+
+# 构建中间产物（体积大，可由 cut.js / bake.js 重新生成，无需入库）
+_art/*.rgba
+_art/*.rgb
+_art/*.out
+_art/src.full.jpg
+
+# 本地工作数据与临时文件
+.workbuddy/
+*.log
+_*.png
+_*.js
+_*.html
+_dl*/
