@@ -40,7 +40,7 @@
 
 ## 在线预览
 
-> 在线预览：https://KBCWHY.github.io/NaiWaPixel/
+> 在线预览：https://kbcwhy.github.io/NaiWaPixel
 
 ## 本地构建
 

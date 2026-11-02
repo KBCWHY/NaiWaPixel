@@ -434,6 +434,7 @@ button{font-family:inherit}
 .home-btn:hover{color:var(--accent)}
 .rail-note{font-size:10.5px;color:#414857;margin-top:6px;letter-spacing:.05em}
 body.at-home .home-btn{display:none}
+.home-btn{display:none} /* 已由「返回书页」取代（弹窗广告需求 ⑤） */
 
 /* 彩蛋：小奶娃喷出 */
 .egg-pop{
@@ -469,12 +470,17 @@ body.at-home .home-btn{display:none}
   mask-image:linear-gradient(90deg,transparent 30%,#000 82%);
 }
 .main.home::before{opacity:0}
-.view{max-width:1010px;padding:32px 30px 80px;animation:viewIn .28s ease}
+.view{max-width:1010px;margin:0 auto;padding:32px 30px 80px;animation:viewIn .28s ease}
 @keyframes viewIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
-.vhead{display:flex;align-items:flex-end;justify-content:space-between;gap:22px;flex-wrap:wrap;margin-bottom:20px}
+.vhead{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:12px;margin-bottom:24px}
 .idx{font-size:10.5px;letter-spacing:.2em;color:var(--accent);opacity:.75;font-weight:600;margin-bottom:7px}
-.vtitle{font-size:21px;font-weight:700;margin:0;letter-spacing:.02em}
-.vdesc{margin:0;color:var(--muted);font-size:13px;line-height:1.85;max-width:400px;text-align:right}
+.vtitle{font-size:21px;font-weight:700;margin:0;letter-spacing:.05em}
+/* 标题一个字一个色：黄 → 绿交替，取的就是滑块那条黄→绿渐变的两端。
+   彩蛋「娃→蛙」会往这四个字里单独塞一层 .frog-t，颜色仍由这两条决定，不会把交替冲掉。 */
+.vtitle .t-y{color:var(--accent);text-shadow:0 0 22px rgba(255,207,92,.22)}
+.vtitle .t-g{color:#3fce8d;text-shadow:0 0 22px rgba(63,206,141,.24)}
+.vdesc{margin:0 auto;color:var(--muted);font-size:13px;line-height:1.85;max-width:620px;text-align:center}
+.vdesc-find{letter-spacing:.16em;font-size:13.5px;color:#93a0b4}
 
 /* 卡片 */
 .card{
@@ -503,15 +509,37 @@ body.at-home .home-btn{display:none}
 .ctl{display:flex;flex-direction:column;gap:9px;min-width:0}
 .ctl-top{display:flex;justify-content:space-between;align-items:baseline;font-size:12.5px;color:var(--muted)}
 .ctl-top b{color:var(--accent);font-weight:600;font-variant-numeric:tabular-nums;font-size:12.5px}
+/* 滑块：已划过的轨道是一整条「黄 → 绿」渐变，宽度跟着 --p 走
+   （滑到中间时，左半边就是压缩后的整条渐变）；圆头换成奶娃头像。
+   --face-art 由脚本从 .brand-mark img 取同一个 data URI，不额外复制一份 base64。 */
 input[type=range]{
   -webkit-appearance:none;appearance:none;width:100%;height:4px;border-radius:99px;
-  background:#262c3a;outline:none;margin:0;
+  --p:0%;
+  background-image:linear-gradient(90deg,#ffe08c 0%,#f7cf5c 30%,#b7e07a 68%,#3fce8d 100%);
+  background-repeat:no-repeat;background-position:0 50%;background-size:var(--p) 100%;
+  background-color:#262c3a;
+  outline:none;margin:0;
 }
 input[type=range]::-webkit-slider-thumb{
-  -webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:var(--accent);
-  cursor:pointer;box-shadow:0 0 0 3px rgba(255,207,92,.14);transition:box-shadow .16s;
+  -webkit-appearance:none;width:20px;height:20px;border-radius:50%;
+  background-image:var(--face-art,none);background-position:center;background-size:cover;
+  background-repeat:no-repeat;background-color:#f7d98a;
+  border:1.5px solid #ffdc8a;
+  cursor:grab;
+  box-shadow:0 0 0 3px rgba(255,207,92,.16),0 3px 8px rgba(0,0,0,.55);
+  transition:box-shadow .16s,transform .16s;
 }
-input[type=range]::-webkit-slider-thumb:hover{box-shadow:0 0 0 5px rgba(255,207,92,.2)}
+input[type=range]::-webkit-slider-thumb:hover{box-shadow:0 0 0 5px rgba(255,207,92,.24),0 3px 10px rgba(0,0,0,.6)}
+input[type=range]:active::-webkit-slider-thumb{cursor:grabbing;transform:scale(1.08)}
+input[type=range]::-moz-range-thumb{
+  width:20px;height:20px;border-radius:50%;border:1.5px solid #ffdc8a;cursor:grab;
+  background-image:var(--face-art,none);background-position:center;background-size:cover;
+  background-repeat:no-repeat;background-color:#f7d98a;
+  box-shadow:0 0 0 3px rgba(255,207,92,.16),0 3px 8px rgba(0,0,0,.55);
+}
+input[type=range]::-moz-range-track{height:4px;border-radius:99px;background:#262c3a}
+input[type=range]::-moz-range-progress{height:4px;border-radius:99px;
+  background:linear-gradient(90deg,#ffe08c 0%,#f7cf5c 30%,#b7e07a 68%,#3fce8d 100%)}
 input[type=range]:disabled{opacity:.45}
 select{
   appearance:none;background:var(--panel2) url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%238b93a5'/%3E%3C/svg%3E") no-repeat right 11px center;
@@ -519,6 +547,54 @@ select{
   padding:8px 30px 8px 11px;font-size:13px;font-family:inherit;cursor:pointer;outline:none;
 }
 select:focus{border-color:rgba(255,207,92,.6)}
+
+/* ── 自定义下拉 ────────────────────────────────────────────────────
+   原生 <select> 的展开列表由操作系统绘制，深色主题下永远是那块灰白方框，
+   改 ::-ms-* / option 都无效。所以连壳一起换：<select> 留在 DOM 里当数据源
+   （JS 仍读写它的 .value、仍派发 change），用户看到的是 trigger + 浮层面板。 */
+.sel{position:relative}
+.sel>select{position:absolute;left:0;top:0;width:1px;height:1px;padding:0;border:0;opacity:0;pointer-events:none}
+.sel-btn{
+  width:100%;display:flex;align-items:center;justify-content:space-between;gap:10px;
+  padding:9px 12px;border-radius:10px;cursor:pointer;text-align:left;
+  font-family:inherit;font-size:13px;color:var(--text);
+  background:linear-gradient(180deg,#1b202b,#151923);
+  border:1px solid var(--border2);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.04);
+  transition:border-color .16s,background .16s,box-shadow .16s;
+}
+.sel-btn:hover{background:linear-gradient(180deg,#202633,#171c26);border-color:#3c4459}
+.sel-btn:focus{outline:none}
+.sel-btn:focus-visible{outline:2px solid rgba(255,207,92,.55);outline-offset:2px}
+.sel.open .sel-btn{border-color:rgba(255,207,92,.58);box-shadow:0 0 0 3px rgba(255,207,92,.1),inset 0 1px 0 rgba(255,255,255,.05)}
+.sel-cur{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* 箭头用两条边旋转出来，省一个 svg；展开时翻 180° 并转成金色 */
+.sel-ar{
+  width:6px;height:6px;flex:0 0 6px;margin-right:2px;
+  border-right:1.5px solid #8b93a5;border-bottom:1.5px solid #8b93a5;
+  transform:rotate(45deg) translate(-1px,-1px);transition:transform .2s,border-color .2s;
+}
+.sel.open .sel-ar{transform:rotate(-135deg) translate(-1px,-1px);border-color:var(--accent)}
+.sel-pop{
+  position:absolute;left:0;right:0;top:calc(100% + 6px);z-index:40;padding:5px;
+  border-radius:12px;
+  background:linear-gradient(180deg,#1c222e,#141821);
+  border:1px solid rgba(255,255,255,.1);
+  box-shadow:0 24px 48px -20px #000,0 0 0 1px rgba(0,0,0,.4);
+  opacity:0;transform:translateY(-6px) scale(.98);transform-origin:top center;
+  pointer-events:none;transition:opacity .15s ease,transform .15s cubic-bezier(.2,.9,.3,1);
+}
+.sel.open .sel-pop{opacity:1;transform:none;pointer-events:auto}
+.sel-opt{
+  display:flex;align-items:center;justify-content:space-between;gap:8px;
+  padding:8px 10px;border-radius:8px;font-size:13px;color:var(--muted);cursor:pointer;
+  transition:background .12s,color .12s;
+}
+.sel-opt:hover,.sel-opt.hi{background:rgba(255,255,255,.055);color:var(--text)}
+.sel-opt.on{color:var(--accent);background:rgba(255,207,92,.1)}
+.sel-opt.on:hover,.sel-opt.on.hi{background:rgba(255,207,92,.16);color:var(--accent)}
+.sel-opt .ck{font-style:normal;font-size:11px;color:#3fce8d;opacity:0;transform:scale(.6);transition:.15s}
+.sel-opt.on .ck{opacity:1;transform:none}
 .ctl-switch{
   flex-direction:row;align-items:center;justify-content:space-between;gap:10px;
   border:1px solid var(--border);border-radius:10px;padding:10px 12px;cursor:pointer;
@@ -545,8 +621,9 @@ select:focus{border-color:rgba(255,207,92,.6)}
 .ctl-note{margin:14px 0 4px;font-size:12px;color:var(--dim);line-height:1.65}
 .ctl-note b{color:var(--muted);font-weight:600}
 
-/* 预览 */
-.row{display:flex;gap:20px;flex-wrap:wrap;align-items:flex-start}
+/* 预览：小图在左、大图在右，两块的水平中心线对齐（列高不同，靠 align-items:center 对齐）。
+   两块的 cap 高度一致，所以「列居中」= 「图块居中」，上下不会错开半个标签的高度。 */
+.row{display:flex;gap:18px;flex-wrap:wrap;align-items:center;justify-content:center}
 .preview{min-width:0}
 .preview .cap{font-size:12px;color:var(--dim);margin-bottom:9px;text-align:center;letter-spacing:.06em}
 .preview.selfie{flex:0 0 150px}
@@ -556,7 +633,10 @@ select:focus{border-color:rgba(255,207,92,.6)}
   border:1.5px dashed var(--border2);border-radius:11px;color:#4a5162;font-size:11.5px;letter-spacing:.08em;
   background:rgba(255,255,255,.012);
 }
-.preview.result{flex:1 1 360px;text-align:center}
+/* 结果列宽度由 JS 按窗口高度收（fitResult 会同时写这一列的宽度）。
+   这里必须 flex:0 0 auto —— flex-basis 的优先级高于 width，写成 0 0 470px 的话
+   JS 改 width 根本不顶用，右列会一直压着 470，和左小图之间多出一道空缝。 */
+.preview.result{flex:0 0 auto;width:470px;max-width:100%;text-align:center}
 .preview canvas{
   width:100%;max-width:150px;height:auto;display:block;margin:0 auto;background:#0c0e13;
   border-radius:11px;border:1px solid var(--border);cursor:zoom-in;transition:transform .15s,border-color .15s;
@@ -576,6 +656,8 @@ select:focus{border-color:rgba(255,207,92,.6)}
 /* 操作行 */
 .actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:18px;padding-top:16px;border-top:1px solid rgba(255,255,255,.05)}
 .actions .spacer{flex:1}
+/* 重组页那两个按钮：不挤在控制卡里，单独一行落在预览卡下方（整页最底） */
+.page-actions{display:flex;justify-content:flex-end;gap:12px;flex-wrap:wrap;margin:2px 0 12px}
 
 /* 状态与提示 */
 .status{font-size:12.5px;color:var(--dim);margin-top:10px;min-height:17px}
@@ -674,13 +756,15 @@ input[type=text]:focus{border-color:rgba(255,207,92,.65);box-shadow:0 0 0 3px rg
   .pages-cap{display:none}
   .actions{gap:9px}
   .actions .spacer{display:none}
+  .page-actions{justify-content:center;gap:9px}
   .btn{padding:8px 13px;font-size:13px}
   .view{padding:22px 16px 60px}
-  .vhead{flex-direction:column;align-items:flex-start;gap:8px}
-  .vdesc{text-align:left}
+  .vhead{flex-direction:column;align-items:center;gap:8px}
+  .vdesc{text-align:center}
   .preview.selfie{flex:1 1 100%}
   .preview.selfie canvas{max-width:120px}
   .preview.selfie.wide{flex:1 1 100%}
+  .preview.result{flex:1 1 100%;width:100%}
 }
 /* 极窄屏：三枚书签必须一屏放得下，不横向滚动 */
 @media (max-width:480px){
@@ -851,9 +935,15 @@ input[type=text]:focus{border-color:rgba(255,207,92,.65);box-shadow:0 0 0 3px rg
 }
 /* hidden 属性只是 UA 的 display:none，会被上面那条 display:grid 盖掉，必须显式写 */
 .legal[hidden]{display:none}
-.legal.closing{animation:legalOut .26s ease forwards;pointer-events:none}
+.legal.closing{pointer-events:none}
 @keyframes legalFade{from{opacity:0}to{opacity:1}}
 @keyframes legalOut{from{opacity:1}to{opacity:0}}
+@keyframes legalDrop{
+  from{transform:translateY(0) rotate(0);opacity:1}
+  60%{opacity:1}
+  to{transform:translateY(120vh) rotate(13deg);opacity:0}
+}
+@keyframes legalDim{from{opacity:1}to{opacity:0}}
 
 .legal-card{
   position:relative;width:min(584px,100%);max-height:min(86vh,760px);overflow:auto;
@@ -898,6 +988,110 @@ input[type=text]:focus{border-color:rgba(255,207,92,.65);box-shadow:0 0 0 3px rg
 /* 滚动锁：遮罩在的时候别让底下的页面跟着滚 */
 html.legal-lock{overflow:hidden}
 
+/* ════════════════════════════════════════════════════════════════
+   弹窗广告需求
+   ════════════════════════════════════════════════════════════════ */
+
+/* ① 禁止左键选取文字 / 拖拽图片（密钥、输入框等需要选中的放行） */
+*,*::before,*::after{-webkit-user-select:none;-moz-user-select:none;-webkit-user-drag:none;user-select:none}
+img{-webkit-user-drag:none;user-drag:none}
+input,textarea,select,.key-val{-webkit-user-select:text;-moz-user-select:text;user-select:text}
+
+/* ② 书页：拖拽果冻 + ⑥ 抽出动画 */
+.page{pointer-events:auto;touch-action:none}
+.page-grab{cursor:grabbing;z-index:6;will-change:transform}
+.page-pull{transform-origin:left center;animation:pagePull .5s cubic-bezier(.22,1,.36,1) forwards;z-index:7;pointer-events:none}
+@keyframes pagePull{
+  0%{transform:translate(0,0) rotate(0) scale(1);opacity:1}
+  55%{transform:translate(20px,-28px) rotate(-3deg) scale(1.04);opacity:1}
+  100%{transform:translate(64px,-60px) rotate(-6deg) scale(1.02);opacity:0}
+}
+.page-jelly{animation:pageJelly .5s cubic-bezier(.3,1.5,.4,1) both;z-index:6}
+@keyframes pageJelly{
+  0%{transform:scale(1,1)}
+  25%{transform:scale(1.07,.93)}
+  50%{transform:scale(.96,1.06)}
+  72%{transform:scale(1.03,.98)}
+  100%{transform:scale(1,1)}
+}
+
+/* ⑤ 返回书页（替代左下角纯文字） */
+.return-page{
+  position:fixed;left:238px;top:50%;transform:translateY(-50%);z-index:25;
+  display:none;align-items:center;justify-content:center;gap:6px;
+  width:40px;padding:18px 7px;border:0;cursor:pointer;
+  writing-mode:vertical-rl;text-orientation:upright;letter-spacing:.2em;
+  font-size:13px;font-weight:600;color:#f7d98a;
+  background:linear-gradient(157deg,#43a176 0%,#31835d 36%,#256a4a 70%,#1d5c40 100%);
+  border-radius:0 12px 12px 0;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.34),inset 0 -18px 24px -20px rgba(0,32,20,.9),0 10px 18px -8px rgba(0,0,0,.55);
+  transition:transform .2s,filter .2s,width .2s;
+}
+.return-page::before{content:'⟵';writing-mode:horizontal-tb;font-size:15px;margin-bottom:5px}
+.return-page:hover{width:48px;filter:brightness(1.08)}
+body:not(.at-home) .return-page{display:flex;animation:returnIn .35s cubic-bezier(.2,.8,.2,1) both}
+@keyframes returnIn{from{opacity:0;transform:translateY(-50%) translateX(-14px)}to{opacity:1;transform:translateY(-50%) translateX(0)}}
+@media (max-width:820px){ .return-page{left:0} }   /* 顶栏布局时贴屏幕左边 */
+
+/* ⑧ 开始键弹珠 */
+.start-grab{cursor:grabbing}
+.marble{position:relative;z-index:300;pointer-events:none;will-change:transform}
+.marble-hit{animation:marbleHit .5s cubic-bezier(.2,1.7,.4,1) both}
+@keyframes marbleHit{
+  0%{transform:scale(1)}
+  28%{transform:scale(1.22);filter:brightness(1.7) drop-shadow(0 0 10px rgba(255,207,92,.9))}
+  100%{transform:scale(1)}
+}
+
+#marbleLayer{position:fixed;inset:0;z-index:300;pointer-events:none;overflow:visible;transition:opacity .7s ease}
+#marbleLayer.fading{opacity:0}
+/* 飞出去的必须是「按住形的开始键」：尺寸/圆角/配色都在 class 里锁死，
+   免得被 .btn 的 hover/active 或残留内联样式改成别的形状。 */
+.marble-fly{position:fixed!important;left:0!important;top:0!important;margin:0!important;z-index:302;
+  border-radius:13px!important;pointer-events:none!important;transform-origin:center;
+  transition:none!important;will-change:transform;contain:layout style}
+.mb-char{position:fixed!important;left:0;top:0;margin:0;padding:0;white-space:pre;
+  pointer-events:none;transform-origin:center;text-shadow:none;contain:layout style}
+.marble-trail{position:fixed;left:0;top:0;border-radius:50%;background:rgba(255,207,92,.5);
+  pointer-events:none;opacity:0;will-change:transform,opacity}
+body.marble-mode .holy{display:none!important}
+body.marble-mode .hero{filter:none!important;animation:none!important}
+
+/* ⑨ 加密 / 还原：处理中的扫描线 + 出图时的像素拼合 + 密钥卡入场 */
+.resultWrap.busy::before{
+  content:'';position:absolute;inset:0;border-radius:11px;z-index:4;pointer-events:none;
+  background:rgba(8,11,17,.8);
+}
+.resultWrap.busy::after{
+  content:'';position:absolute;left:0;right:0;top:0;height:42%;z-index:5;pointer-events:none;
+  background:linear-gradient(180deg,transparent,rgba(127,227,194,.1) 38%,rgba(255,207,92,.5) 50%,rgba(127,227,194,.1) 62%,transparent);
+  animation:scanSweep 1.15s cubic-bezier(.42,0,.58,1) infinite;
+}
+@keyframes scanSweep{0%{transform:translateY(-110%)}100%{transform:translateY(340%)}}
+
+.px-bit{position:absolute;pointer-events:none;border-radius:2px;
+  background:linear-gradient(160deg,#ffe6a6,#efc04a);
+  animation:pxBitOut .58s cubic-bezier(.3,.8,.3,1) forwards}
+@keyframes pxBitOut{
+  0%{opacity:.95;transform:scale(1)}
+  55%{opacity:.5}
+  100%{opacity:0;transform:scale(.12) rotate(28deg)}
+}
+
+.keycard.key-in{animation:keyIn .55s cubic-bezier(.2,.9,.3,1) both}
+@keyframes keyIn{
+  0%{opacity:0;transform:translateY(16px) scale(.982);filter:blur(4px)}
+  100%{opacity:1;transform:none;filter:none}
+}
+.key-val .kc{display:inline-block;opacity:0;animation:kcIn .32s cubic-bezier(.2,1.5,.45,1) forwards}
+@keyframes kcIn{
+  0%{opacity:0;transform:translateY(9px) scale(.65) rotate(-10deg)}
+  100%{opacity:1;transform:none}
+}
+
+.btn.is-busy{animation:btnBusy 1.1s ease-in-out infinite}
+@keyframes btnBusy{0%,100%{filter:brightness(1)}50%{filter:brightness(1.2) drop-shadow(0 0 8px rgba(255,207,92,.4))}}
+
 @media (prefers-reduced-motion:reduce){
   .legal,.legal-card{animation:none}
 }
@@ -939,7 +1133,7 @@ html.legal-lock{overflow:hidden}
       <button class="page" data-view="reassemble">
         <span class="page-in">
           <span class="ico face-ico" aria-hidden="true"></span>
-          <span class="lbl"><b>奶娃重组</b><i>上传自拍 · 变成奶娃</i></span>
+          <span class="lbl"><b>奶娃重组</b><i>上传图片 · 变成奶娃</i></span>
           <span class="num">01</span>
         </span>
       </button>
@@ -976,6 +1170,7 @@ html.legal-lock{overflow:hidden}
   </aside>
 
   <main class="main home" id="mainArea">
+    <button class="return-page" id="returnPage" type="button" aria-label="返回开始界面">返回</button>
     <section class="landing" id="landing">
       <div class="holy" id="holy" aria-hidden="true">
         <i class="holy-rays"></i>
@@ -1006,16 +1201,16 @@ html.legal-lock{overflow:hidden}
     <section class="view" id="view-reassemble" hidden>
       <div class="vhead">
         <div>
-          <div class="idx">01 / REASSEMBLE</div>
-          <h2 class="vtitle">奶娃重组</h2>
+          <div class="idx">01</div>
+          <h2 class="vtitle"><span class="t-y">奶</span><span class="t-g">娃</span><span class="t-y">重</span><span class="t-g">组</span></h2>
         </div>
-        <p class="vdesc">上传自拍，按奶娃的明暗把像素重新铺一遍。<br>颜色取自照片本身，黑白化 100% 时与奶娃逐像素一致。</p>
+        <p class="vdesc vdesc-find">寻找你的奶娃</p>
       </div>
 
       <div class="card">
         <div class="drop" id="drop">
           <div class="drop-ico">🖼️</div>
-          <div class="drop-t1">点击或拖拽上传自拍照</div>
+          <div class="drop-t1">点击或拖拽上传图片</div>
           <div class="drop-t2">jpg / png · 随时拖入新照片重做</div>
         </div>
         <input type="file" id="file" accept="image/*" hidden>
@@ -1026,8 +1221,8 @@ html.legal-lock{overflow:hidden}
             <input type="range" id="bw" min="0" max="100" value="0">
           </label>
           <label class="ctl">
-            <span class="ctl-top"><span>色块消除</span><b><span id="deblockVal">100</span>%</b></span>
-            <input type="range" id="deblock" min="0" max="100" value="100">
+            <span class="ctl-top"><span>色块消除</span><b><span id="deblockVal">0</span>%</b></span>
+            <input type="range" id="deblock" min="0" max="100" value="0">
           </label>
           <label class="ctl">
             <span class="ctl-top"><span>色彩浓度</span><b><span id="satVal">140</span>%</b></span>
@@ -1035,56 +1230,66 @@ html.legal-lock{overflow:hidden}
           </label>
         </div>
         <div class="ctl-row">
-          <label class="ctl">
+          <div class="ctl">
             <span class="ctl-top"><span>动画时长</span></span>
-            <select id="animDur">
-              <option value="1.5">1.5 秒</option>
-              <option value="2.5" selected>2.5 秒</option>
-              <option value="4">4 秒</option>
-              <option value="6">6 秒</option>
-            </select>
-          </label>
-          <label class="ctl">
+            <div class="sel" data-sel>
+              <select id="animDur" tabindex="-1" aria-hidden="true">
+                <option value="1.5">1.5 秒</option>
+                <option value="2.5" selected>2.5 秒</option>
+                <option value="4">4 秒</option>
+                <option value="6">6 秒</option>
+              </select>
+              <button type="button" class="sel-btn" aria-haspopup="listbox" aria-expanded="false" aria-label="动画时长">
+                <span class="sel-cur">2.5 秒</span><i class="sel-ar" aria-hidden="true"></i>
+              </button>
+              <div class="sel-pop" role="listbox"></div>
+            </div>
+          </div>
+          <div class="ctl">
             <span class="ctl-top"><span>动画形式</span></span>
-            <select id="animMode">
-              <option value="flight" selected>粒子飞移</option>
-              <option value="vortex">漩涡重组</option>
-            </select>
-          </label>
+            <div class="sel" data-sel>
+              <select id="animMode" tabindex="-1" aria-hidden="true">
+                <option value="flight" selected>粒子飞移</option>
+                <option value="vortex">漩涡重组</option>
+              </select>
+              <button type="button" class="sel-btn" aria-haspopup="listbox" aria-expanded="false" aria-label="动画形式">
+                <span class="sel-cur">粒子飞移</span><i class="sel-ar" aria-hidden="true"></i>
+              </button>
+              <div class="sel-pop" role="listbox"></div>
+            </div>
+          </div>
           <label class="ctl-switch">
             <span>逐像素精确重排</span>
             <input type="checkbox" id="pixelExact"><i class="sw"></i>
           </label>
         </div>
         <div class="status" id="status">正在加载奶娃目标图…</div>
-        <div class="actions">
-          <span class="spacer"></span>
-          <button class="btn" id="replay" disabled>重播动画</button>
-          <button class="btn" id="download" disabled>下载结果 PNG</button>
-          <button class="btn btn-primary" id="toKeyBtn" disabled>试试加密版 →</button>
-        </div>
       </div>
 
-      <div class="card">
+      <div class="card" id="prevCard">
         <div class="row">
-          <div class="preview selfie"><div class="cap">你的自拍</div>
+          <div class="preview selfie"><div class="cap">你的图片</div>
             <div class="src-wrap"><canvas id="srcPrev"></canvas><div class="ph" id="selfiePh">未上传</div></div></div>
           <div class="preview result"><div class="cap">重组结果</div>
             <div class="resultWrap">
               <canvas id="show"></canvas>
-              <div class="empty-tip" id="emptyTip"><span>🖼️</span><b>还没有结果</b><i>上传自拍后，这里会播放重组动画</i></div>
+              <div class="empty-tip" id="emptyTip"><span>🖼️</span><b>还没有结果</b><i>上传图片后，这里会播放重组动画</i></div>
             </div>
           </div>
         </div>
+      </div>
 
+      <div class="page-actions">
+        <button class="btn" id="replay" disabled>重播动画</button>
+        <button class="btn" id="download" disabled>下载结果 PNG</button>
       </div>
     </section>
 
         <section class="view" id="view-key" hidden>
       <div class="vhead">
         <div>
-          <div class="idx">02 / ENCRYPT</div>
-          <h2 class="vtitle">奶娃加密</h2>
+          <div class="idx">02</div>
+          <h2 class="vtitle"><span class="t-y">奶</span><span class="t-g">娃</span><span class="t-y">加</span><span class="t-g">密</span></h2>
         </div>
         <p class="vdesc">上传原图，重组成奶娃的同时生成一个 12 位密钥。<br>密钥决定颗粒怎么落位、用多重的色块与浓度，也决定这张图能不能被解开。</p>
       </div>
@@ -1159,8 +1364,8 @@ html.legal-lock{overflow:hidden}
     <section class="view" id="view-restore" hidden>
       <div class="vhead">
         <div>
-          <div class="idx">03 / RESTORE</div>
-          <h2 class="vtitle">还原图片</h2>
+          <div class="idx">03</div>
+          <h2 class="vtitle"><span class="t-y">还</span><span class="t-g">原</span><span class="t-y">图</span><span class="t-g">片</span></h2>
         </div>
         <p class="vdesc">导入收到的加密图，输入对方给的密钥。<br>只有原图生成时用的那一个密钥能取回照片。</p>
       </div>
@@ -1250,7 +1455,7 @@ const $ = id=>document.getElementById(id);
 const show=$('show'), srcPrev=$('srcPrev');
 const showCtx=show.getContext('2d'), srcPrevCtx=srcPrev.getContext('2d');
 const drop=$('drop'), fileInput=$('file'), statusEl=$('status'), downloadBtn=$('download');
-const replayBtn=$('replay'), toKeyBtn=$('toKeyBtn');
+const replayBtn=$('replay');
 const emptyTip=$('emptyTip'), selfiePh=$('selfiePh');
 const bw=$('bw'), bwVal=$('bwVal'), animDurSel=$('animDur'), animModeSel=$('animMode');
 const deblockRange=$('deblock'), deblockVal=$('deblockVal'), satRange=$('sat'), satVal=$('satVal'), pixelExactChk=$('pixelExact');
@@ -1271,6 +1476,7 @@ function setHash(v){
   try{ history.replaceState(null,'',v?'#'+v:location.pathname+location.search); }catch(e){}
 }
 function go(name, pushHash){
+  clearMarble();
   if(!VIEW_IDS[name]) return;
   curView=name;
   ensureBaby();          // 进工作页就一定要这份数据，别等空闲了
@@ -1292,9 +1498,9 @@ function goHome(){
   window.scrollTo(0,0);
 }
 document.querySelectorAll('[data-view],[data-go]').forEach(b=>{
+  if(b.classList.contains('page')) return; // 书页改由拖拽 / 抽出逻辑处理（弹窗广告需求 ②⑥）
   b.addEventListener('click',()=>go(b.dataset.view||b.dataset.go));
 });
-$('startBtn').addEventListener('click',()=>go('reassemble'));
 $('homeBtn').addEventListener('click',goHome);
 
 /* ── 免责声明：点过「同意」才放开场动画 ──
@@ -1304,17 +1510,68 @@ $('homeBtn').addEventListener('click',goHome);
    否则那 4.4 秒的圣光与降临全在弹窗背后演完了，关掉时只剩一具静止的奶娃。 */
 const legalEl=$('legal'), legalOk=$('legalOk');
 let legalClosed=false;
+function kickoffHoly(){
+  const L=$('landing');
+  if(L && !L.hidden) holyOpen();        // 只在开场屏存在时放圣光与降临
+}
 function legalClose(){
   if(legalClosed) return;
   legalClosed=true;
   legalEl.classList.add('closing');
   document.documentElement.classList.remove('legal-lock');
-  setTimeout(()=>{ legalEl.hidden=true; legalEl.classList.remove('closing'); },300);
-  // 遮罩淡出 0.26s，动画晚 140ms 起 —— 正好接上，不会出现「遮罩一没、天使已经落到半路」。
-  // 直接带 #key / #restore 进来时没有开场屏，也就不放圣光和降临。
-  const L=$('landing');
-  if(L && !L.hidden) setTimeout(holyOpen,140);
   try{ $('startBtn').focus({preventScroll:true}); }catch(e){}
+  const card=legalEl.querySelector('.legal-card');
+  if(REDUCED || !card){ legalEl.hidden=true; legalEl.classList.remove('closing'); kickoffHoly(); return; }
+  const r=card.getBoundingClientRect();
+  const dy=(innerHeight - r.height - 10) - r.top;            // 落到贴地的位置
+  const drop=card.animate(
+    [{transform:'translateY(0) rotate(0)'},{transform:`translateY(${dy}px) rotate(7deg)`}],
+    {duration:600, easing:'cubic-bezier(.45,0,.85,.45)', fill:'forwards'}
+  );
+  drop.onfinish=()=>shatterLegal(card, r.left, r.top+dy);
+  card._drop=drop;
+}
+function shatterLegal(card, left, top){
+  const w=card.offsetWidth, h=card.offsetHeight;
+  const host=document.createElement('div');
+  host.style.cssText=`position:fixed;left:${left}px;top:${top}px;width:${w}px;height:${h}px;z-index:210;pointer-events:none`;
+  // 3×3 不规则碎片（百分比多边形）
+  const POLY=[
+    '0% 0%,35% 0%,40% 22%,0 30%',
+    '35% 0%,70% 0%,72% 28%,40% 22%',
+    '70% 0%,100% 0%,100% 32%,72% 28%',
+    '0 30%,40% 22%,38% 58%,0 62%',
+    '40% 22%,72% 28%,70% 60%,38% 58%',
+    '72% 28%,100% 32%,100% 64%,70% 60%',
+    '0 62%,38% 58%,34% 100%,0 100%',
+    '38% 58%,70% 60%,68% 100%,34% 100%',
+    '70% 60%,100% 64%,100% 100%,68% 100%'
+  ];
+  const cx=w/2, cy=h/2;
+  POLY.forEach((poly,i)=>{
+    const sh=document.createElement('div');
+    sh.style.cssText=`position:absolute;inset:0;clip-path:polygon(${poly});
+      background:linear-gradient(168deg,#1b221c 0%,#121713 48%,#0c100d 100%);
+      border:1px solid rgba(247,217,138,.18);box-shadow:inset 0 1px 0 rgba(255,255,255,.06)`;
+    host.appendChild(sh);
+    const m=poly.match(/[\d.]+/g).map(Number);
+    const pcx=(m[0]+m[2]+m[4]+m[6])/4/100*w, pcy=(m[1]+m[3]+m[5]+m[7])/4/100*h;
+    let dx=pcx-cx, dy=pcy-cy; const d=Math.hypot(dx,dy)||1; dx/=d; dy/=d;
+    const dist=120+Math.random()*170, rot=(Math.random()*2-1)*170;
+    sh.animate([
+      {transform:'translate(0,0) rotate(0)',opacity:1},
+      {transform:`translate(${dx*dist}px,${dy*dist-40}px) rotate(${rot}deg)`,opacity:0}
+    ],{duration:420+Math.random()*220,easing:'cubic-bezier(.2,.7,.3,1)',fill:'forwards',delay:i*8});
+  });
+  document.body.appendChild(host);
+  card.style.visibility='hidden';
+  setTimeout(()=>{
+    if(card._drop) card._drop.cancel();
+    host.remove();
+    legalEl.hidden=true; legalEl.classList.remove('closing');
+    card.style.visibility=''; card.style.transform='';
+    kickoffHoly();                       // 弹窗彻底关掉后才让天使降临
+  }, 760);
 }
 legalOk.addEventListener('click',legalClose);
 // 绑 document 而不是弹窗本身：用户随手点一下卡片空白，焦点就落到 body 上了，
@@ -1805,7 +2062,9 @@ function loadBaby(){
   img.src=BABY_DATAURI;
 }
 
-// 结果图按窗口高度收敛宽度：保证「下载/分享」按钮不被挤到首屏之外
+// 结果图按窗口高度收敛宽度，别让整块预览高到一屏看不全。
+// 结果列现在是不伸缩的定宽列，所以宽度要同时写到「列」上 —— 只改 .resultWrap
+// 的话列还停在 470，小图和大图之间会多出一道原本没有的空隙。
 function fitResult(){
   if(!babyW||!babyH) return;
   const wrap=document.querySelector('.resultWrap');
@@ -1813,8 +2072,23 @@ function fitResult(){
   const hMax=Math.max(320, Math.round(window.innerHeight*0.62));
   const wMax=Math.min(470, Math.round(hMax*babyW/babyH));
   wrap.style.maxWidth=wMax+'px';
+  const col=wrap.closest('.preview.result');
+  if(col) col.style.width=wMax+'px';
 }
 window.addEventListener('resize',fitResult);
+
+/* 拖进图片就开跑动画，但预览在下面 —— 窗口小一点时动画整段都在视野外，
+   用户只会看到「处理中」一闪，以为自己拖失败了。所以起跑前把预览卡带进视野。
+   已经在视野里就一点都不动，免得刚拖完画面自己跳一下。 */
+function revealPreview(){
+  const card=document.getElementById('prevCard');
+  if(!card) return;
+  const r=card.getBoundingClientRect();
+  const vh=window.innerHeight||document.documentElement.clientHeight;
+  if(r.top>=-4 && r.bottom<=vh+4) return;
+  const quiet=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  window.scrollTo({top:Math.max(0, window.scrollY + r.top - 16), behavior:quiet?'auto':'smooth'});
+}
 
 function analyzeBaby(img){
   let w=img.width, h=img.height;
@@ -1854,7 +2128,7 @@ function processFile(file){
     URL.revokeObjectURL(srcURL);
     downloadBtn.disabled=true;
     replayBtn.disabled=true;
-    toKeyBtn.disabled=true;
+    revealPreview();
     animateFlight();
   };
   img.onerror=()=>{ statusEl.textContent='图片读取失败'; URL.revokeObjectURL(srcURL); };
@@ -1869,7 +2143,7 @@ function render(){
   img.data.set(out);
   showCtx.putImageData(img,0,0);
   // 动画中途被滑块打断时不会走 onAnimDone，这里兜底恢复按钮，否则下载/重播会永久变灰
-  if(!animating){ downloadBtn.disabled=false; replayBtn.disabled=false; toKeyBtn.disabled=false; }
+  if(!animating){ downloadBtn.disabled=false; replayBtn.disabled=false; }
 }
 // 单帧约 10-30ms（191k 像素），滑块拖动时用 rAF 合并连续事件，避免排队卡死
 let renderRaf=0;
@@ -1885,7 +2159,6 @@ function onAnimDone(){
   animating=false;
   downloadBtn.disabled=false;
   replayBtn.disabled=false;
-  toKeyBtn.disabled=false;
   if(cache) render();   // 动画结束后切回高清逐像素结果
   statusEl.textContent='';
 }
@@ -2034,7 +2307,7 @@ function animateFlight(){
   if(!cache) return;
   cancelAnim();
   animating=true;
-  downloadBtn.disabled=true; replayBtn.disabled=true; toKeyBtn.disabled=true;
+  downloadBtn.disabled=true; replayBtn.disabled=true;
   statusEl.textContent = '';
   buildAnim();
   const DUR=durMs, start=performance.now();
@@ -2069,9 +2342,6 @@ window.addEventListener('drop',e=>{
 });
 replayBtn.addEventListener('click',()=>{ if(cache) animateFlight(); });
 downloadBtn.addEventListener('click',()=>{ if(!cache) return; const a=document.createElement('a'); a.download='baby-reassembled.png'; a.href=show.toDataURL('image/png'); a.click(); });
-// 加密页要自己重新选一次原图：重组是可逆的视觉玩法，加密是另一条独立的线，
-// 数据不在这里偷偷流过去，两页职责才清楚。
-toKeyBtn.addEventListener('click',()=>{ go('key'); });
 
 const lightbox=$('lightbox'), big=$('big'), bigCap=$('bigCap'), lbClose=$('lbClose');
 function openLightbox(srcCanvas, cap){
@@ -2080,7 +2350,7 @@ function openLightbox(srcCanvas, cap){
   bigCap.textContent=cap;
   lightbox.classList.add('show');
 }
-[['srcPrev','你的自拍'],['show','重组结果']].forEach(([id,cap])=>{ $(id).addEventListener('click',()=>openLightbox($(id),cap)); });
+[['srcPrev','你的图片'],['show','重组结果']].forEach(([id,cap])=>{ $(id).addEventListener('click',()=>openLightbox($(id),cap)); });
 lightbox.addEventListener('click',e=>{ if(e.target===lightbox||e.target===lbClose) lightbox.classList.remove('show'); });
 
 
@@ -2382,6 +2652,7 @@ async function encRun(forceNewKey){
   if(encBusy || !encSrcImg || !encSrcBytes) return;
   if(!kcHasCrypto()) return kcSay(encMsg,'当前环境不支持 WebCrypto，换 https 或本地打开再试。',true);
   encBusy=true; encGo.disabled=true; encReroll.disabled=true;
+  encGo.classList.add('is-busy'); busyWrap(encCanvas,true);
   try{
     const K = (forceNewKey || !encKeyRaw) ? kcGenKey() : encKeyRaw;
     const W=babyW, H=babyH, N=W*H;
@@ -2452,13 +2723,18 @@ async function encRun(forceNewKey){
     encKeyRaw=K; encDirty=false;
     keyVal.textContent=kcFmtKey(K);
     keyCard.hidden=false;
+    keyCard.classList.remove('key-in'); void keyCard.offsetWidth; keyCard.classList.add('key-in');
+    keyStagger();
     encGo.textContent='按这个密钥重新生成';
     encReroll.disabled=false;
     kcSay(encMsg,'已生成 '+(bytes.length/1048576).toFixed(2)+' MB 的加密图（色块消除 '+look.deblock+
       '%、色彩浓度 '+look.sat+'%）。图和密钥分两条路发出去 —— 只发图，对方拿到的就是一张普通奶娃图。',false);
+    revealResult(encCanvas);
   }catch(e){
     kcSay(encMsg,'生成失败：'+(e&&e.message||e),true);
+    busyWrap(encCanvas,false);
   }
+  encGo.classList.remove('is-busy');
   encBusy=false; encGo.disabled=false; encReroll.disabled=!encSrcBytes;
 }
 
@@ -2528,6 +2804,7 @@ restoreBtn.addEventListener('click',async()=>{
   if(!kcHasCrypto()) return kcSay(restoreMsg,'当前环境不支持 WebCrypto。',true);
 
   pkgBusy=true; restoreBtn.disabled=true;
+  restoreBtn.classList.add('is-busy'); busyWrap(restorePrev,true);
   kcSay(restoreMsg,'还原中…');
   try{
     const cont=kcPngFindChunk(pkgBytes,KC.CHUNK);
@@ -2564,9 +2841,12 @@ restoreBtn.addEventListener('click',async()=>{
       restoreBox.style.display='block';
       kcSay(restoreMsg,'已还原 1 张图（'+back.W+'×'+back.H+'），可下载查看。',false);
     }
+    revealResult(restorePrev);
   }catch(e){
     kcSay(restoreMsg,'这张图无法解析：'+(e&&e.message||e),true);
+    busyWrap(restorePrev,false);
   }
+  restoreBtn.classList.remove('is-busy');
   pkgBusy=false; restoreBtn.disabled=false;
 });
 function nb0(res){ return res.bytes[0]||0; }
@@ -2581,6 +2861,56 @@ restoreDrop.addEventListener('drop',e=>{
   const f=e.dataTransfer&&e.dataTransfer.files[0]; if(f) takeRestoreFile(f);
 });
 restoreKey.addEventListener('keydown',e=>{ if(e.key==='Enter'&&!restoreBtn.disabled) restoreBtn.click(); });
+
+/* ---------- 加解密动效：扫描中 / 出图像素拼合 / 密钥逐字入场 ---------- */
+// 处理中：给 .resultWrap 加 .busy（CSS 里是遮罩 + 扫描线）
+function busyWrap(el,on){
+  const wrap=el&&el.parentElement;
+  if(wrap&&wrap.classList.contains('resultWrap')) wrap.classList.toggle('busy',!!on);
+}
+// 出图：图片从模糊放大变清晰，同时一层金色像素块往外飞散
+function revealResult(el){
+  if(!el) return;
+  const wrap=el.parentElement;
+  if(wrap) wrap.classList.remove('busy');
+  if(el.animate){
+    el.animate(
+      [{opacity:0,filter:'blur(18px) brightness(1.75)',transform:'scale(.94)'},
+       {opacity:1,filter:'blur(0px) brightness(1)',transform:'scale(1)'}],
+      {duration:640,easing:'cubic-bezier(.2,.8,.2,1)'}
+    );
+  }
+  if(!wrap) return;
+  const r=el.getBoundingClientRect(), wr=wrap.getBoundingClientRect();
+  if(r.width<10||r.height<10) return;
+  const holder=document.createElement('div');
+  holder.style.cssText='position:absolute;pointer-events:none;z-index:6;'+
+    'left:'+(r.left-wr.left)+'px;top:'+(r.top-wr.top)+'px;width:'+r.width+'px;height:'+r.height+'px';
+  const cols=9, rows=Math.max(4,Math.round(cols*r.height/r.width));
+  for(let y=0;y<rows;y++)for(let x=0;x<cols;x++){
+    if(Math.random()<.3) continue;
+    const d=document.createElement('i');
+    d.className='px-bit';
+    d.style.left=(x/cols*100)+'%'; d.style.top=(y/rows*100)+'%';
+    d.style.width=(100/cols)+'%'; d.style.height=(100/rows)+'%';
+    d.style.animationDelay=(Math.random()*240)+'ms';
+    holder.appendChild(d);
+  }
+  wrap.appendChild(holder);
+  setTimeout(()=>holder.remove(),1200);
+}
+// 密钥一个字一个字弹出来
+function keyStagger(){
+  const t=(keyVal.textContent||'').trim();
+  if(!t) return;
+  keyVal.textContent='';
+  for(let i=0;i<t.length;i++){
+    const s=document.createElement('span');
+    s.className='kc'; s.textContent=t[i];
+    s.style.animationDelay=(i*26)+'ms';
+    keyVal.appendChild(s);
+  }
+}
 /*===KEY-END===*/
 
 // 带 #key / #restore 直接打开时跳过开场屏，也就没有圣光和降临。
@@ -2654,6 +2984,464 @@ else setTimeout(warmSfx,900);
   addEventListener('scroll',()=>{ box=null; },{passive:true,capture:true});
   // 字体加载完书签高度会变一点，眼睛跟着挪，所以 fonts.ready 之后也要重取一次
   if(document.fonts && document.fonts.ready) document.fonts.ready.then(()=>{ box=null; });
+})();
+
+/* ════════════════════════════════════════════════════════════════
+   弹窗广告需求：② 书页拖拽果冻 ⑥ 抽出动画 ⑤ 返回书页 ⑧ 开始键弹珠 ① 图片禁拖
+   ════════════════════════════════════════════════════════════════ */
+const REDUCED = matchMedia('(prefers-reduced-motion:reduce)').matches;
+
+/* ① 图片禁止被拖出（跨浏览器兜底，CSS 之外再加一层 dragstart 拦截） */
+document.querySelectorAll('img').forEach(i=>{ i.draggable=false; });
+document.addEventListener('dragstart',e=>{ if(e.target instanceof HTMLImageElement) e.preventDefault(); });
+
+/* —— ② 书页拖拽（果冻挤压）+ ⑥ 点击抽出 —— */
+document.querySelectorAll('.page').forEach(p=>{
+  let pid=null, sx=0, sy=0, lx=0, ly=0, dragging=false, moved=false;
+  p.addEventListener('pointerdown',e=>{
+    if(e.button!==0) return;
+    pid=e.pointerId; dragging=true; moved=false;
+    sx=lx=e.clientX; sy=ly=e.clientY;
+    p.setPointerCapture(pid);
+    p.classList.add('page-grab');
+    p.style.transition='none';
+  });
+  p.addEventListener('pointermove',e=>{
+    if(!dragging||e.pointerId!==pid) return;
+    const dx=e.clientX-sx, dy=e.clientY-sy;
+    if(Math.hypot(dx,dy)>6) moved=true;
+    const now=performance.now(), dt=Math.max(1,now-(p._lt||now)); p._lt=now;
+    const vx=(e.clientX-lx)/dt*16, vy=(e.clientY-ly)/dt*16;
+    lx=e.clientX; ly=e.clientY;
+    let tx=dx*0.28, ty=dy*0.28;                   // 拖拽极限距离收紧
+    const MAX=90; tx=Math.max(-MAX,Math.min(MAX,tx)); ty=Math.max(-MAX,Math.min(MAX,ty));
+    const sp=Math.min(1,Math.hypot(vx,vy)/45);
+    const sxk=1+sp*0.09, syk=1-sp*0.07;           // 果冻幅度收小
+    p.style.transform=`translate(${tx}px,${ty}px) scale(${sxk},${syk}) rotate(${dx*0.012}deg)`;
+  });
+  function end(e){
+    if(!dragging||e.pointerId!==pid) return;
+    dragging=false; p.classList.remove('page-grab');
+    try{p.releasePointerCapture(pid);}catch(_){}
+    p._lt=0;
+    if(moved){                                     // 真拖拽：弹回 + 果冻抖动
+      p.style.transition='transform .55s cubic-bezier(.2,1.5,.35,1)';
+      p.style.transform='';
+      p.classList.add('page-jelly');
+      setTimeout(()=>{ p.classList.remove('page-jelly'); p.style.transition=''; },560);
+    }else{                                         // 纯点击：抽出动画后再进页
+      pullOut(p);
+    }
+  }
+  p.addEventListener('pointerup',end);
+  p.addEventListener('pointercancel',end);
+});
+function pullOut(p){
+  const view=p.dataset.view;
+  p.classList.add('page-pull');
+  setTimeout(()=>{ p.classList.remove('page-pull'); p.style.transition=''; go(view); },420);
+}
+
+/* —— ⑤ 返回书页 —— */
+const returnPage=$('returnPage');
+if(returnPage) returnPage.addEventListener('click',goHome);
+
+/* —— ⑧ 开始键：可拖动，松手像弹珠打出，击中主界面每个文字 —— */
+const startBtn=$('startBtn');
+const START_CSS=startBtn.style.cssText;      // 记录开始键初始内联样式，打完/清场时恢复
+let sd=false, sm=false, ssx=0, ssy=0, slx=0, sly=0;
+startBtn.addEventListener('pointerdown',e=>{
+  if(e.button!==0) return;
+  if(REDUCED){ go('reassemble'); return; }
+  sd=true; sm=false; ssx=slx=e.clientX; ssy=sly=e.clientY;
+  startBtn.setPointerCapture(e.pointerId);
+  startBtn.classList.add('start-grab');
+  startBtn.style.transition='none';
+});
+startBtn.addEventListener('pointermove',e=>{
+  if(!sd) return;
+  const dx=e.clientX-ssx, dy=e.clientY-ssy;
+  if(Math.hypot(dx,dy)>7) sm=true;
+  slx=e.clientX; sly=e.clientY;
+  // 拖拽只做位移，不加旋转 —— 松手时要拿这个矩形当飞行起点，旋转会让包围盒变大、起点偏掉
+  startBtn.style.transform=`translate(${dx}px,${dy}px)`;
+});
+function sEnd(e){
+  if(!sd) return;
+  sd=false; startBtn.classList.remove('start-grab');
+  try{startBtn.releasePointerCapture(e.pointerId);}catch(_){}
+  startBtn._lt=0;
+  if(!sm){                                  // 轻点 = 直接进「奶娃重组」
+    startBtn.style.transition=''; startBtn.style.transform=''; go('reassemble'); return;
+  }
+  // 弹弓：往哪拉，就往反方向弹。位移取反 → 向下拖 = 向上射。
+  const px=(e.clientX==null?slx:e.clientX)-ssx;
+  const py=(e.clientY==null?sly:e.clientY)-ssy;
+  startBtn.style.transition='';
+  launchMarble(-px*0.16, -py*0.16);
+}
+startBtn.addEventListener('pointerup',sEnd);
+startBtn.addEventListener('pointercancel',sEnd);
+
+/* 这里必须是 var，不能用 let：下面第 2917 行的「带 hash 直接打开」会调 go()，
+   而 go() 第一句就是 clearMarble()。let 在那之前是 TDZ，一访问就 ReferenceError，
+   于是 index.html#key 直接打开（或在功能页上刷新）会白屏 —— var 提前 hoist 成 undefined，
+   clearMarble 里的 if(!marbleState) 就能正常兜住。 */
+var marbleState=null;
+function clearMarble(){
+  if(!marbleState) return;
+  const s=marbleState;
+  if(s.stop) s.stop();                          // 先停物理循环，别让它清场后继续改写开始键 transform
+  cancelAnimationFrame(s.raf);
+  if(s.fadeT) clearTimeout(s.fadeT);            // 取消收场定时器，避免重开一局后旧回调误清新场景
+  if(s.resetT) clearTimeout(s.resetT);
+  s.blocks.forEach(b=>{ b.style.visibility=''; });
+  if(s.key){
+    s.key.classList.remove('marble-fly');
+    s.key.style.cssText=START_CSS;
+    s.key.style.transform='';                    // 双保险：抹掉飞行残留的 translate3d
+    // 飞行期间开始键被搬进了 #marbleLayer（否则会被 .lan-in 的 z-index:3 压在字符层下面），
+    // 清场时务必先搬回 .lan-act，再删层 —— 否则按钮会跟着层一起被丢掉。
+    if(s.keyHome && s.key.parentElement!==s.keyHome) s.keyHome.appendChild(s.key);
+  }
+  if(s.layer) s.layer.remove();
+  document.body.classList.remove('marble-mode');
+  marbleState=null;
+}
+/* 开始键本体飞出去；被它扫过的每个字，早在发射时就建成了同尺寸的 fixed 字符体，
+   命中只是「给速度」。这样做解决三个老问题：
+   ① 命中瞬间零 DOM 创建、零布局读取 —— 之前每命中一块字都要 Range 逐字量矩形 +
+      getComputedStyle，一次炸开就把主线程堵死，这是「点着点着卡死」和动画卡的根因；
+   ② 字形/颜色/渐变在发射时一次性复制，弹起来和原文字长得一模一样；
+   ③ 物理只在【已激活】的字符体之间做，并用网格粗筛，不再 O(n²) 全量比较。 */
+function launchMarble(vx0, vy0){
+  if(REDUCED){ go('reassemble'); return; }
+  if(marbleState) clearMarble();                 // 再拖一次 = 重开一局
+
+  const key=$('startBtn');
+  const kr=key.getBoundingClientRect();           // 拖动后的真实位置（此时还没换 class）
+  let sp=Math.hypot(vx0,vy0);
+  if(sp<8){ const a=-Math.PI/2+(Math.random()-.5)*.7; vx0=Math.cos(a)*16; vy0=Math.sin(a)*16; }
+  else if(sp>26){ vx0*=26/sp; vy0*=26/sp; }
+
+  /* ——— 只读阶段：把每块文字、每个字符的位置一次性量完（此刻布局还没被改动） ——— */
+  // 只拆标识 / 标题 / 副文案：页脚那两行免责小字约 60 字，逐字建 fixed+translate3d 合成层
+  // 会把总数冲到 150+，浏览器「截图 / 合成」时极易卡死。页脚保持原样、不参与打散。
+  const blocks=[...document.querySelectorAll('.lan-eye,.lan-title,.lan-sub')]
+    .filter(el=>el.offsetParent!==null);
+  const groups=[];
+  for(const block of blocks){
+    const br=block.getBoundingClientRect();
+    const walker=document.createTreeWalker(block,NodeFilter.SHOW_TEXT);
+    const nodes=[]; let n; while(n=walker.nextNode()) nodes.push(n);
+    const range=document.createRange();
+    for(const node of nodes){
+      const host=node.parentElement; if(!host) continue;
+      const cs=getComputedStyle(host);
+      const txt=node.nodeValue||''; const chars=[];
+      for(let i=0;i<txt.length;i++){
+        const ch=txt[i];
+        if(!ch.trim()) continue;
+        range.setStart(node,i); range.setEnd(node,i+1);
+        const r=range.getBoundingClientRect();
+        if(r.width<1&&r.height<1) continue;
+        chars.push({ch,x:r.left,y:r.top,w:r.width,h:r.height});
+      }
+      if(chars.length) groups.push({br,cs,chars});
+    }
+  }
+
+  /* ——— 只写阶段：建层、复制字符、把原文字藏起来（占位保留，版面不跳） ——— */
+  const layer=document.createElement('div'); layer.id='marbleLayer';
+  document.body.appendChild(layer);
+  document.body.classList.add('marble-mode');
+  const items=[];
+  for(const g of groups){
+    const cs=g.cs;
+    const grad=!!cs.backgroundImage && cs.backgroundImage!=='none';
+    const lh=(cs.lineHeight==='normal' ? ((parseFloat(cs.fontSize)||13)*1.25)+'px' : cs.lineHeight);
+    // 标题原本是 background-clip:text 渐变；字符体一旦带 transform，Chrome 会按「没动过」
+    // 的位置再裁一遍金色，留下重影/穿模（见 .lan-title 处注释）。这里统一改实色填充，彻底规避残影。
+    const col=grad?'#ffd97a':(cs.color==='rgba(0, 0, 0, 0)'?'#f4dc9a':cs.color);
+    for(const c of g.chars){
+      const s=document.createElement('span');
+      s.className='mb-char'; s.textContent=c.ch;
+      s.style.fontFamily=cs.fontFamily; s.style.fontSize=cs.fontSize;
+      s.style.fontWeight=cs.fontWeight; s.style.fontStyle=cs.fontStyle;
+      s.style.letterSpacing=cs.letterSpacing; s.style.lineHeight=lh;
+      s.style.color=col; s.style.webkitTextFillColor=col;
+      s.style.transform=`translate(${c.x}px,${c.y}px)`;
+      layer.appendChild(s);
+      items.push({el:s,x:c.x,y:c.y,w:c.w,h:c.h,alive:false,vx:0,vy:0,ang:0,spin:0,age:0});
+    }
+  }
+  for(const b of blocks) b.style.visibility='hidden';
+
+  const keyHome=key.parentElement;
+  layer.appendChild(key);                          // 搬进层里，飞行时才盖得住字符体
+  key.classList.add('marble-fly');
+  key.style.cssText=`width:${kr.width}px;height:${kr.height}px;box-sizing:border-box`;
+  key.style.transform=`translate(${kr.left}px,${kr.top}px)`;
+  const keyBody={el:key,x:kr.left,y:kr.top,w:kr.width,h:kr.height,vx:vx0,vy:vy0,ang:0,spin:(Math.random()*2-1)*.03,age:0};
+  const bodies=[keyBody];
+
+  /* 拖尾用固定 10 个节点轮换，绝不新建/销毁 DOM —— 之前的「球」就是小圆点
+     在按键中心越堆越多糊成一团，现在只落在按键尾巴外面。 */
+  const trailPool=[];
+  for(let i=0;i<10;i++){
+    const d=document.createElement('div'); d.className='marble-trail';
+    d.style.width=d.style.height='9px';
+    layer.appendChild(d);
+    trailPool.push(d);
+  }
+  let trailI=0;
+  let raf=0, last=performance.now(), acc=0, fc=0, slow=0, frameNo=0;
+  let stopped=false;
+
+  function activate(it,ux,uy){
+    it.alive=true; it.age=0;
+    const cx=it.x+it.w/2, cy=it.y+it.h/2;
+    const kx=keyBody.x+keyBody.w/2, ky=keyBody.y+keyBody.h/2;
+    let a=Math.atan2(cy-ky,cx-kx)+(Math.random()-.5)*.55;   // 相邻字飞散角度错开，别挤成一团
+    if(!isFinite(a)) a=Math.random()*6.283;
+    const spd=7+Math.random()*7;
+    it.vx=Math.cos(a)*spd+ux*4.5;
+    it.vy=Math.sin(a)*spd+uy*4.5;
+    it.spin=(Math.random()*2-1)*.08;                          // 旋转放慢，字形不易互相穿插
+    it.el.style.zIndex='301';                                 // 统一层级（开始键 302 在最上），消除前后乱序穿插
+    bodies.push(it);
+  }
+  function clamp(b){
+    const W=innerWidth, H=innerHeight;
+    if(b.x<0){b.x=0;b.vx=Math.abs(b.vx)*.94;}
+    else if(b.x+b.w>W){b.x=W-b.w;b.vx=-Math.abs(b.vx)*.94;}
+    if(b.y<0){b.y=0;b.vy=Math.abs(b.vy)*.94;}
+    else if(b.y+b.h>H){b.y=H-b.h;b.vy=-Math.abs(b.vy)*.94;}
+  }
+  function step(){
+    for(const b of bodies){
+      b.age++;
+      b.x+=b.vx; b.y+=b.vy; b.ang+=b.spin;
+      b.vx*=.995; b.vy*=.995;
+      clamp(b);
+    }
+    // 命中：只有开始键能把文字「打散」，扫过谁就把谁激活
+    if(items.length){
+      const spd=Math.hypot(keyBody.vx,keyBody.vy)||1;
+      const ux=keyBody.vx/spd, uy=keyBody.vy/spd;
+      for(const it of items){
+        if(it.alive) continue;
+        if(keyBody.x<it.x+it.w && keyBody.x+keyBody.w>it.x &&
+           keyBody.y<it.y+it.h && keyBody.y+keyBody.h>it.y) activate(it,ux,uy);
+      }
+    }
+    // 网格粗筛：只比同格与相邻格，150 个字也不会退化成两两全比
+    if(bodies.length>1){
+      const CS=130, grid=new Map();
+      for(let i=0;i<bodies.length;i++){
+        const b=bodies[i];
+        const k=((((b.x+b.w*.5)/CS)|0)*1000)+(((b.y+b.h*.5)/CS)|0);
+        const arr=grid.get(k); if(arr) arr.push(i); else grid.set(k,[i]);
+      }
+      for(let i=0;i<bodies.length;i++){
+        const a=bodies[i];
+        const gx=((a.x+a.w*.5)/CS)|0, gy=((a.y+a.h*.5)/CS)|0;
+        for(let ox=-1;ox<=1;ox++)for(let oy=-1;oy<=1;oy++){
+          const arr=grid.get((gx+ox)*1000+(gy+oy)); if(!arr) continue;
+          for(let n=0;n<arr.length;n++){
+            const j=arr[n]; if(j<=i) continue;
+            const b=bodies[j];
+            if(a.age<3||b.age<3) continue;           // 出膛缓冲缩短，尽早分开、别叠在一起
+            const ar=Math.hypot(a.w,a.h)*.5, br=Math.hypot(b.w,b.h)*.5;  // 外接圆半径：字形旋转后也不穿插
+            const dx=(b.x+b.w*.5)-(a.x+a.w*.5), dy=(b.y+b.h*.5)-(a.y+a.h*.5);
+            const d=Math.hypot(dx,dy), md=ar+br;
+            if(d>0&&d<md){
+              const nx=dx/d, ny=dy/d, ov=md-d;
+              a.x-=nx*ov*.6; a.y-=ny*ov*.6; b.x+=nx*ov*.6; b.y+=ny*ov*.6;
+              const vn=(a.vx-b.vx)*nx+(a.vy-b.vy)*ny;
+              if(vn>0){ a.vx-=vn*nx; a.vy-=vn*ny; b.vx+=vn*nx; b.vy+=vn*ny; }
+              clamp(a); clamp(b);
+            }
+          }
+        }
+      }
+    }
+  }
+  function render(){
+    frameNo++;
+    // 开始键飞得快，每帧都更新；字符体多时隔帧写入(约 30fps)——物理仍 60fps，碰撞手感不变，
+    // 但每帧的样式写入与合成压力减半，截图/合成不再容易把主线程堵死。
+    keyBody.el.style.transform=`translate3d(${keyBody.x}px,${keyBody.y}px,0) rotate(${keyBody.ang}rad)`;
+    if(bodies.length<=50 || (frameNo&1)===0){
+      for(let i=1;i<bodies.length;i++){
+        const b=bodies[i];
+        b.el.style.transform=`translate3d(${b.x}px,${b.y}px,0) rotate(${b.ang}rad)`;
+      }
+    }
+  }
+  function spawnTrail(now){
+    const spd=Math.hypot(keyBody.vx,keyBody.vy);
+    if(spd<5) return;
+    const ux=keyBody.vx/spd, uy=keyBody.vy/spd;
+    const back=Math.max(keyBody.w,keyBody.h)*.42+6;   // 落在按键尾巴外面，不堆在键身里
+    const d=trailPool[trailI]; trailI=(trailI+1)%trailPool.length;
+    d.style.transform=`translate3d(${keyBody.x+keyBody.w/2-ux*back-4.5}px,${keyBody.y+keyBody.h/2-uy*back-4.5}px,0)`;
+    d.dataset.life=String(now);
+  }
+  function frame(now){
+    if(stopped) return;                          // 清场后已排队的帧直接丢弃，不再渲染 / 续帧
+    let dt=(now-last)/1000; last=now;
+    if(dt>.08) dt=.08;
+    acc+=dt;
+    const STEP=1/60; let guard=0;
+    while(acc>=STEP && guard++<3){ step(); acc-=STEP; }
+    render();
+    if((fc++&2)===0) spawnTrail(now);
+    for(const d of trailPool){
+      if(!d.dataset.life) continue;
+      const age=now-(+d.dataset.life);
+      if(age>260){ d.style.opacity='0'; d.dataset.life=''; }
+      else d.style.opacity=String(.42*(1-age/260));
+    }
+    let moving=false;
+    for(const b of bodies){ if(b.vx*b.vx+b.vy*b.vy>0.04){ moving=true; break; } }
+    if(moving) slow=0; else slow++;
+    // 只按「是否真的停稳」收工，彻底去掉 20s 硬超时（那会在玩家还在看时突然冻结画面）
+    if(slow>150){                                   // 全都停稳并持续 2.5s → 停 rAF，场景留在原地
+      stopped=true;
+      cancelAnimationFrame(raf);
+      for(const d of trailPool) d.style.opacity='0';
+      // 不在这里移除 marble-mode：整个 12s 场景期间都保持关滤镜，等收场 clearMarble() 统一还原
+      marbleState.raf=0;
+      return;
+    }
+    raf=requestAnimationFrame(frame);
+    marbleState.raf=raf;                          // 每帧把最新 id 同步回 state，clearMarble 才 cancel 得掉
+  }
+  marbleState={raf:0,layer,blocks,key,items,keyHome,fadeT:0,resetT:0,stop:null};
+  marbleState.stop=()=>{ stopped=true; };
+  raf=requestAnimationFrame(frame);
+  marbleState.raf=raf;
+
+  /* —— 收场时间线 ——
+     弹射触发后，每个字（含开始键）统一只存在 SCENE_MS；随后整层（开始键 + 所有字 + 拖尾，
+     因为开始键被搬进了层里）一起淡化，全部消失后空场停留 HOLD_MS，再 clearMarble()
+     把文字/开始键还原成主界面最开始的样子。
+     用独立 setTimeout 而不挂在 rAF 里：物理停稳会提前 cancel 掉 rAF（省 CPU），收场仍要照常发生。
+     每次发射记一个 scene 令牌；期间若又拖一次开始键，clearMarble() 会清掉旧定时器，
+     回调开头的 marbleState!==scene 校验再兜一层，绝不会误清新场景。 */
+  const SCENE_MS=12000, FADE_MS=700, HOLD_MS=1000;
+  const scene=marbleState;
+  const finish=()=>{
+    if(marbleState!==scene) return;
+    clearMarble();                                 // 文字/开始键/层复位到主界面最开始的样子
+  };
+  scene.fadeT=setTimeout(()=>{
+    if(marbleState!==scene) return;
+    layer.classList.add('fading');                 // 整个层一起淡化消失
+    scene.resetT=setTimeout(finish, FADE_MS+HOLD_MS);
+  }, SCENE_MS);
+}
+
+/* —— ⑨ 滑块：已划过的轨道按 --p 铺「黄 → 绿」渐变；圆头换成奶娃头像 —— */
+(function(){
+  const face=document.querySelector('.brand-mark img');
+  if(face&&face.src) document.documentElement.style.setProperty('--face-art','url("'+face.src+'")');
+  const sync=r=>{
+    const min=parseFloat(r.min)||0, max=parseFloat(r.max)||100, v=parseFloat(r.value)||0;
+    const p=max>min?Math.max(0,Math.min(1,(v-min)/(max-min))):0;
+    r.style.setProperty('--p',(p*100).toFixed(2)+'%');
+  };
+  document.querySelectorAll('input[type=range]').forEach(r=>{
+    sync(r);
+    r.addEventListener('input',()=>sync(r));
+    r.addEventListener('change',()=>sync(r));
+  });
+})();
+
+/* —— ⑩ 下拉面板：原生 select 藏在里面当数据源，外面那层是自绘的 ——
+   只读 .value、只派发 change，所以 animDur / animMode 那两处监听一行都不用改。 */
+(function(){
+  const boxes=Array.from(document.querySelectorAll('.sel[data-sel]'));
+  if(!boxes.length) return;
+  const setOpen=(box,on)=>{
+    box.classList.toggle('open',on);
+    const b=box.querySelector('.sel-btn');
+    if(b) b.setAttribute('aria-expanded',on?'true':'false');
+  };
+  const closeAll=except=>boxes.forEach(b=>{
+    if(b!==except && b.classList.contains('open')) setOpen(b,false);
+  });
+
+  boxes.forEach(box=>{
+    const native=box.querySelector('select'),
+          btn=box.querySelector('.sel-btn'),
+          cur=box.querySelector('.sel-cur'),
+          pop=box.querySelector('.sel-pop');
+    if(!native||!btn||!cur||!pop) return;
+    const opts=Array.from(native.options);
+    let hi=Math.max(0, native.selectedIndex);
+
+    const mark=()=>Array.from(pop.children).forEach((d,i)=>d.classList.toggle('hi',i===hi));
+    const sync=()=>{
+      const i=native.selectedIndex;
+      if(i>=0) cur.textContent=opts[i].textContent;
+      Array.from(pop.children).forEach((d,k)=>{
+        const on=k===i;
+        d.classList.toggle('on',on);
+        d.setAttribute('aria-selected',on?'true':'false');
+      });
+    };
+    const open=()=>{ closeAll(box); hi=Math.max(0,native.selectedIndex); sync(); mark(); setOpen(box,true); };
+    const close=()=>setOpen(box,false);
+    const pick=i=>{
+      if(!opts[i]) return;
+      native.selectedIndex=i;
+      native.dispatchEvent(new Event('change',{bubbles:true}));
+      sync(); close(); btn.focus();
+    };
+
+    opts.forEach((o,i)=>{
+      const d=document.createElement('div');
+      d.className='sel-opt'; d.setAttribute('role','option');
+      const t=document.createElement('span'); t.textContent=o.textContent;
+      const c=document.createElement('i'); c.className='ck'; c.textContent='✓';
+      d.appendChild(t); d.appendChild(c);
+      d.addEventListener('mousemove',()=>{ hi=i; mark(); });
+      d.addEventListener('mousedown',e=>e.preventDefault());   // 别把焦点从按钮上抢走
+      d.addEventListener('click',()=>pick(i));
+      pop.appendChild(d);
+    });
+    pop.addEventListener('click',e=>e.stopPropagation());
+
+    btn.addEventListener('click',e=>{
+      e.stopPropagation();
+      box.classList.contains('open') ? close() : open();
+    });
+    btn.addEventListener('keydown',e=>{
+      const on=box.classList.contains('open');
+      if(e.key==='Escape'){ if(on){ e.preventDefault(); close(); } return; }
+      if(e.key==='Tab'){ close(); return; }
+      if(!on){
+        if(e.key==='ArrowDown'||e.key==='ArrowUp'||e.key==='Enter'||e.key===' '){ e.preventDefault(); open(); }
+        return;
+      }
+      if(e.key==='ArrowDown'||e.key==='ArrowUp'){
+        e.preventDefault();
+        hi=(hi+(e.key==='ArrowDown'?1:-1)+opts.length)%opts.length; mark();
+      }else if(e.key==='Home'||e.key==='End'){
+        e.preventDefault(); hi=e.key==='Home'?0:opts.length-1; mark();
+      }else if(e.key==='Enter'||e.key===' '){
+        e.preventDefault(); pick(hi);
+      }
+    });
+    box.addEventListener('focusout',e=>{ if(!box.contains(e.relatedTarget)) close(); });
+
+    sync();
+  });
+
+  document.addEventListener('click',()=>closeAll(null));
+  window.addEventListener('scroll',()=>closeAll(null),{passive:true});
 })();
 </script>
 </body>
