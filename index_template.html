@@ -13,7 +13,7 @@
   --text:#e8ebf2; --muted:#8b93a5; --dim:#61697b;
   --accent:#ffcf5c; --accent2:#6f9bff;
   --frog:#7fe3c2;            /* 奶蛙眼睛的淡绿：圣光、变蛙都用它 */
-  --baby-art:url("__BABY_ART__"); --face-art:url("__FACE_ART__");
+  --baby-art:url("__BABY_ART__"); --face-art:url("__FACE_ART__"); --bg-art:url("__BG_BLUR__");
 }
 *{box-sizing:border-box}
 body{
@@ -44,11 +44,13 @@ button{font-family:inherit}
 
 /* ─────────── 背景层（奶娃图做环境光） ─────────── */
 .bg{
-  /* 用负 inset 给模糊出血，比原来的 transform:scale(1.2) 少光栅化约 1/3 的面积；
-     blur 也从 34px 收到 30px —— 高斯半径对成本影响很大，而画面上看不出差别。 */
-  position:fixed;inset:-56px;z-index:0;pointer-events:none;
-  background-image:var(--baby-art);background-position:50% 26%;background-size:cover;background-repeat:no-repeat;
-  filter:blur(30px) saturate(1.2) brightness(.72);opacity:.42;
+  /* 这层原本是 filter:blur(30px) saturate(1.2) brightness(.72) + opacity:.42，
+     一张满屏（1552×1012）的图每帧都要过高斯 + 调色 —— 独立显卡上还好，软件合成或
+     弱核显上单这一层就能把帧时间顶穿，是「一进去就卡」和弹珠场景的主要背景开销。
+     现在整套（模糊、饱和、亮度、42% 透明度）都烘焙进了 _art/bg-blur.webp，
+     alpha 也已预乘，运行时只剩一次普通贴图，filter 节点彻底不存在了。 */
+  position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:var(--bg-art);background-position:50% 50%;background-size:cover;background-repeat:no-repeat;
 }
 .bg::after{
   content:'';position:absolute;inset:0;
@@ -607,19 +609,7 @@ select:focus{border-color:rgba(255,207,92,.6)}
 .ctl-switch input:checked ~ .sw{background:rgba(255,207,92,.32)}
 .ctl-switch input:checked ~ .sw::after{transform:translateX(15px);background:var(--accent)}
 .ctl-switch:has(input:checked){border-color:rgba(255,207,92,.45);color:var(--text)}
-/* 只读参数卡：数值由密钥派生，不给拖 */
-.ctl-ro{cursor:default}
-.ctl-ro .ctl-top b{color:var(--muted);transition:color .3s}
-.ctl-ro.on .ctl-top b{color:var(--accent)}
-.ro-bar{position:relative;height:4px;border-radius:99px;background:#2b3242;overflow:hidden}
-.ro-bar i{
-  position:absolute;top:0;left:0;height:100%;width:0;border-radius:99px;
-  background:linear-gradient(90deg,rgba(255,207,92,.35),rgba(255,207,92,.85));
-  transition:width .55s cubic-bezier(.2,.8,.2,1);
-}
-.ctl-ro.blue .ro-bar i{background:linear-gradient(90deg,rgba(111,155,255,.3),rgba(111,155,255,.8))}
-.ctl-note{margin:14px 0 4px;font-size:12px;color:var(--dim);line-height:1.65}
-.ctl-note b{color:var(--muted);font-weight:600}
+
 
 /* 预览：小图在左、大图在右，两块的水平中心线对齐（列高不同，靠 align-items:center 对齐）。
    两块的 cap 高度一致，所以「列居中」= 「图块居中」，上下不会错开半个标签的高度。 */
@@ -672,7 +662,7 @@ input[type=text]{
 }
 input[type=text]:focus{border-color:rgba(255,207,92,.65);box-shadow:0 0 0 3px rgba(255,207,92,.1)}
 #restoreKey{letter-spacing:.14em;font-variant-numeric:tabular-nums}
-#encCanvas{width:100%;max-width:100%;height:auto;display:block;border-radius:11px;border:1px solid var(--border)}
+#encCanvas{width:100%;max-width:100%;height:auto;display:block;border-radius:11px;border:0}
 
 /* 密钥卡：整页最该被看到的一块，字号给足、可整段选中 */
 .keycard{border-color:rgba(255,207,92,.3);background:linear-gradient(180deg,rgba(255,207,92,.062),rgba(255,207,92,.015))}
@@ -682,20 +672,26 @@ input[type=text]:focus{border-color:rgba(255,207,92,.65);box-shadow:0 0 0 3px rg
 .key-val{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:clamp(21px,3.4vw,34px);letter-spacing:.09em;line-height:1.25;color:#ffe6ae;margin:12px 0 16px;user-select:all;word-break:break-all}
 .key-acts{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 
-/* 密钥 / 还原：骨架与「奶娃重组」一致，只在控件行多一格口令 */
+/* 密钥 / 还原：预览区与「奶娃重组」同规格 —— 左 150 小图，右 787:1096 的大画布 */
 .ctl-txt{flex:1 1 300px;min-width:220px}
 .ctl-txt input{width:100%}
-.preview.selfie.wide{flex:0 0 190px}
-.src-wrap.thumb{position:relative;width:190px;max-width:190px;margin:0 auto;aspect-ratio:3/4;border-radius:11px;background:rgba(255,255,255,.02);overflow:hidden}
+/* 加密页只剩「黑白化程度」一格，别让 auto-fit 把它拉成整行 */
+#view-key .ctl-grid{grid-template-columns:220px}
+.preview.selfie.wide{flex:0 0 150px}
+.src-wrap.thumb{position:relative;width:150px;max-width:150px;margin:0 auto;aspect-ratio:var(--result-ar,787/1096);border-radius:11px;background:rgba(255,255,255,.02);overflow:hidden}
 .src-wrap.thumb img{width:100%;height:100%;object-fit:contain;display:block}
 .src-wrap.thumb img[hidden]{display:none}
-.src-wrap.pickable{display:block;cursor:pointer}
-.src-wrap.pickable:hover .ph{border-color:rgba(255,207,92,.62);color:#8a92a3;background:rgba(255,207,92,.04)}
 .src-wrap .ph.hide{display:none}
 .preview .status{text-align:left;font-size:11px;line-height:1.65;margin-top:9px;min-height:0}
-#view-key .resultWrap,#view-restore .resultWrap{min-height:266px;display:flex;align-items:center;justify-content:center}
-#view-key .empty-tip,#view-restore .empty-tip{border:1.5px dashed var(--border2);border-radius:11px;background:rgba(255,255,255,.012)}
-.resultWrap img{max-width:100%;max-height:62vh;width:auto;height:auto;display:block;margin:0 auto;border-radius:11px;border:1px solid var(--border)}
+/* 空状态也是一块「画布」：和 01 页那个 #show 画布完全同款 —— 1px 细边框 + 透明底，
+   不是一块比卡片更黑的洞，也不是虚线框 */
+#view-key .resultWrap,#view-restore .resultWrap{
+  aspect-ratio:var(--result-ar,787/1096);border:1px solid var(--border);border-radius:11px;background:transparent;
+  display:flex;align-items:center;justify-content:center;
+}
+/* 还原出来的图比例不定：出图后让框跟着图走，不硬撑成 787:1096 留一大片空 */
+#view-restore .resultWrap.has-img{aspect-ratio:auto;background:transparent}
+.resultWrap img{max-width:100%;max-height:62vh;width:auto;height:auto;display:block;margin:0 auto;border-radius:11px;border:0}
 .restore-box{margin-top:14px;text-align:center}
 .dl-link{display:inline-flex;align-items:center;gap:6px;margin-top:12px;color:var(--accent2);font-size:13px;text-decoration:none;border-bottom:1px dashed rgba(111,155,255,.4);padding-bottom:2px}
 
@@ -1291,7 +1287,7 @@ body.marble-mode .hero{filter:none!important;animation:none!important}
           <div class="idx">02</div>
           <h2 class="vtitle"><span class="t-y">奶</span><span class="t-g">娃</span><span class="t-y">加</span><span class="t-g">密</span></h2>
         </div>
-        <p class="vdesc">上传原图，重组成奶娃的同时生成一个 12 位密钥。<br>密钥决定颗粒怎么落位、用多重的色块与浓度，也决定这张图能不能被解开。</p>
+        <p class="vdesc vdesc-find">奶娃会保护好你的秘密</p>
       </div>
 
       <div class="card">
@@ -1307,17 +1303,7 @@ body.marble-mode .hero{filter:none!important;animation:none!important}
             <span class="ctl-top"><span>黑白化程度</span><b><span id="eBwVal">0</span>%</b></span>
             <input type="range" id="eBw" min="0" max="100" value="0">
           </label>
-          <div class="ctl ctl-ro" id="roDeblock">
-            <span class="ctl-top"><span>色块消除</span><b><span id="eDeblockVal">—</span>%</b></span>
-            <div class="ro-bar"><i id="eDeblockBar"></i></div>
-          </div>
-          <div class="ctl ctl-ro blue" id="roSat">
-            <span class="ctl-top"><span>色彩浓度</span><b><span id="eSatVal">—</span>%</b></span>
-            <div class="ro-bar"><i id="eSatBar"></i></div>
-          </div>
         </div>
-        <div class="ctl-note">这两项<b>由密钥决定</b>：色块消除 1–21%、色彩浓度 100–120%，
-          同一个密钥永远同一组数值，换密钥就换一组。</div>
 
         <div class="status" id="encMsg">上传原图后点「加密重组」。</div>
         <div class="actions">
@@ -1344,11 +1330,10 @@ body.marble-mode .hero{filter:none!important;animation:none!important}
         <div class="row">
           <div class="preview selfie wide">
             <div class="cap">原图</div>
-            <label class="src-wrap thumb pickable" for="encInput">
+            <div class="src-wrap thumb">
               <img id="encSrcPrev" alt="" hidden>
-              <div class="ph" id="encSrcPh">点击选择</div>
-            </label>
-            <div class="status" id="encSrcMsg">按文件原始字节加密，不重新压缩。</div>
+              <div class="ph" id="encSrcPh">未上传</div>
+            </div>
           </div>
           <div class="preview result">
             <div class="cap">加密重组图</div>
@@ -1367,7 +1352,7 @@ body.marble-mode .hero{filter:none!important;animation:none!important}
           <div class="idx">03</div>
           <h2 class="vtitle"><span class="t-y">还</span><span class="t-g">原</span><span class="t-y">图</span><span class="t-g">片</span></h2>
         </div>
-        <p class="vdesc">导入收到的加密图，输入对方给的密钥。<br>只有原图生成时用的那一个密钥能取回照片。</p>
+        <p class="vdesc vdesc-find">奶娃会告诉你答案</p>
       </div>
 
       <div class="card">
@@ -1397,11 +1382,10 @@ body.marble-mode .hero{filter:none!important;animation:none!important}
         <div class="row">
           <div class="preview selfie wide">
             <div class="cap">加密图</div>
-            <label class="src-wrap thumb pickable" for="restoreInput">
+            <div class="src-wrap thumb">
               <img id="restoreThumb" alt="" hidden>
-              <div class="ph" id="restoreThumbPh">点击选择</div>
-            </label>
-            <div class="status">只对无损保存的 PNG 有效。</div>
+              <div class="ph" id="restoreThumbPh">未上传</div>
+            </div>
           </div>
           <div class="preview result">
             <div class="cap">还原结果</div>
@@ -1460,6 +1444,7 @@ const emptyTip=$('emptyTip'), selfiePh=$('selfiePh');
 const bw=$('bw'), bwVal=$('bwVal'), animDurSel=$('animDur'), animModeSel=$('animMode');
 const deblockRange=$('deblock'), deblockVal=$('deblockVal'), satRange=$('sat'), satVal=$('satVal'), pixelExactChk=$('pixelExact');
 let lastSrcFile=null;   // 最近一次上传的原文件（密钥页可直接取用，按原始字节加密）
+let pendingFile=null;   // 奶娃图还没分析完时先存住用户选的图
 
 /*===SHELL-START===*/
 // 开场屏 ↔ 应用：三个功能各占一个 view，靠左侧书签切换；状态保留在各自 DOM 里。
@@ -1982,22 +1967,34 @@ function partnerMap(W, H, N, seed){
 
 // 建立色度缓存：本地色度（同一位置）+ 名次色度（旧算法的配色，供 0% 档对照）
 // seed 非空时启用「密钥驱动的段内置换」，重组图细节随密钥变化。
+/* 目标位「按奶娃亮度升序」这件事只取决于奶娃图，跟上传的是哪张照片无关。
+   每换一张照片都重排 19 万个 index 是纯浪费（实测约 40ms），所以全站算一次就缓存。
+   加密档要打乱，调用方先 slice() 一份再交给 segShuffle，缓存永远只读。 */
+let babyOrderFor=null, babyOrderArr=null;
+function babyLumOrder(){
+  if(babyOrderFor===babyLum && babyOrderArr) return babyOrderArr;
+  const N=babyLum.length;
+  const a=Array.from({length:N},(_,i)=>i);
+  a.sort((x,y)=>babyLum[x]-babyLum[y]);                 // 目标位按奶娃亮度升序
+  babyOrderFor=babyLum; babyOrderArr=a;
+  return a;
+}
 function buildChromaCache(d, N, seed){
   const cbLoc=new Float32Array(N), crLoc=new Float32Array(N);
+  const slum=new Float32Array(N);                       // 源亮度顺路在这一趟里算掉，省一遍循环
   for(let i=0;i<N;i++){
     const o=i*4, r=d[o], g=d[o+1], b=d[o+2];
     cbLoc[i]=-0.168736*r-0.331264*g+0.5*b;
     crLoc[i]=0.5*r-0.418688*g-0.081312*b;
+    slum[i]=lumOf(r,g,b);
   }
-  const posOrder=Array.from({length:N},(_,i)=>i);
-  posOrder.sort((a,b)=>babyLum[a]-babyLum[b]);          // 目标位按奶娃亮度升序
+  let posOrder=babyLumOrder();
   let partner=null;
   if(seed!=null){
+    posOrder=posOrder.slice();                          // 复制再打乱，别动缓存
     segShuffle(posOrder, N, seed);
     partner=partnerMap(babyW, babyH, N, seed);
   }
-  const slum=new Float32Array(N);
-  for(let i=0;i<N;i++){ const o=i*4; slum[i]=lumOf(d[o],d[o+1],d[o+2]); }
   const srcOrder=Array.from({length:N},(_,i)=>i);
   srcOrder.sort((a,b)=>slum[a]-slum[b]);                // 源像素按自身亮度升序
   const cbRk=new Float32Array(N), crRk=new Float32Array(N), yrk=new Float32Array(N);
@@ -2063,17 +2060,20 @@ function loadBaby(){
 }
 
 // 结果图按窗口高度收敛宽度，别让整块预览高到一屏看不全。
-// 结果列现在是不伸缩的定宽列，所以宽度要同时写到「列」上 —— 只改 .resultWrap
+// 三个功能页共用这一套尺寸：窗口一变，01/02/03 三块大图同步缩放，永远一样大。
+// 结果列是不伸缩的定宽列，所以宽度要同时写到「列」上 —— 只改 .resultWrap
 // 的话列还停在 470，小图和大图之间会多出一道原本没有的空隙。
 function fitResult(){
   if(!babyW||!babyH) return;
-  const wrap=document.querySelector('.resultWrap');
-  if(!wrap) return;
+  // 三页的框都按奶娃目标图的真实比例来 —— 写死 787:1096 会和 01 页的画布差几像素
+  document.documentElement.style.setProperty('--result-ar', babyW+' / '+babyH);
   const hMax=Math.max(320, Math.round(window.innerHeight*0.62));
   const wMax=Math.min(470, Math.round(hMax*babyW/babyH));
-  wrap.style.maxWidth=wMax+'px';
-  const col=wrap.closest('.preview.result');
-  if(col) col.style.width=wMax+'px';
+  document.querySelectorAll('.resultWrap').forEach(wrap=>{
+    wrap.style.maxWidth=wMax+'px';
+    const col=wrap.closest('.preview.result');
+    if(col) col.style.width=wMax+'px';
+  });
 }
 window.addEventListener('resize',fitResult);
 
@@ -2099,16 +2099,31 @@ function analyzeBaby(img){
   const ctx=c.getContext('2d'); ctx.drawImage(img,0,0,babyW,babyH); babyCanvas=c;
   const d=ctx.getImageData(0,0,babyW,babyH).data;
   const N=babyW*babyH;
-  babyLum=new Float32Array(N);
-  for(let i=0;i<N;i++){ const o=i*4; babyLum[i]=lumOf(d[o],d[o+1],d[o+2]); }
-  show.width=babyW; show.height=babyH;
-  srcPrev.width=babyW; srcPrev.height=babyH;
-  fitResult();
-  statusEl.textContent='奶娃目标已加载 ✓';
+  const lum=new Float32Array(N);
+  /* 19 万像素的亮度循环一口气跑完要 300ms 上下 —— trace 里那条 idle 回调单次 363ms，
+     就卡在开场动画上。切成 2.4 万一批、批间让出主线程：总时长不变，但没有一帧超过 ~50ms。
+     babyLum 必须等整张算完才赋值 —— 它是「就绪」标志，跑到一半被上传读到就废了。 */
+  const CHUNK=24000;
+  let i=0;
+  const step=()=>{
+    const end=Math.min(N,i+CHUNK);
+    for(;i<end;i++){ const o=i*4; lum[i]=lumOf(d[o],d[o+1],d[o+2]); }
+    if(i<N){ setTimeout(step,16); return; }
+    babyLum=lum;
+    show.width=babyW; show.height=babyH;
+    srcPrev.width=babyW; srcPrev.height=babyH;
+    fitResult();
+    statusEl.textContent='奶娃目标已加载 ✓';
+    if(pendingFile){ const f=pendingFile; pendingFile=null; processFile(f); }
+  };
+  step();
 }
 
 function processFile(file){
-  if(!file || !babyLum) return;
+  if(!file) return;
+  /* 奶娃图的亮度分析现在是分批跑的（见 analyzeBaby），刚进工作页的那一瞬间可能还没算完。
+     以前它是同步的，永远不会撞上；现在要先把文件存下来，算完立刻接上，别让用户白选一次。 */
+  if(!babyLum){ pendingFile=file; statusEl.textContent='奶娃目标还在加载，马上开始…'; return; }
   lastSrcFile=file;                      // 记住原文件，方便重播时复用
   statusEl.textContent='处理中…';
   const img=new Image();
@@ -2231,29 +2246,31 @@ function buildAnim(){
   }
   if(!animImg) animImg=animCtx.createImageData(AW,AH);
 }
-// 单个粒子在进度 e（0=自拍，1=奶娃）时的位置，按动画形式计算运动轨迹。
-function particlePos(i, e, mode){
-  const {AW,AH,srcX,srcY,tgtX,tgtY}=animData;
-  if(mode==='vortex'){
-    // 漩涡（差速螺旋）：每个粒子各自绕中心螺旋移动，旋转量随其到中心的半径增大，
-    // 外圈转得多、内圈转得少 → 黑洞吸入的漩涡感，而非整图刚性旋转。两端精确落位。
-    const cx=AW/2, cy=AH/2;
-    const sx=srcX[i]-cx, sy=srcY[i]-cy;    // 向量 源-中心
-    const tx=tgtX[i]-cx, ty=tgtY[i]-cy;    // 向量 目标-中心
-    const r0=Math.sqrt(sx*sx+sy*sy), rt=Math.sqrt(tx*tx+ty*ty);
-    let th0=Math.atan2(sy,sx), tht=Math.atan2(ty,tx);
-    while(tht-th0> Math.PI) tht-=2*Math.PI; // 取最短角差，避免绕远路
-    while(tht-th0<-Math.PI) tht+=2*Math.PI;
-    const r=(1-e)*r0 + e*rt;               // 半径从源位置插值到目标位置
-    const th=(1-e)*th0 + e*tht;            // 角度从源角度插值到目标角度
-    const Rmax=Math.sqrt(cx*cx+cy*cy)||1;
-    const wind=r0/Rmax;                     // 0(中心)..1(边缘)：外圈多转
-    const spin=Math.PI*2.2 * wind * Math.sin(Math.PI*e); // 中段漩涡，e=0/1 时为 0 → 精确落位
-    const a=th+spin;
-    return [cx + r*Math.cos(a), cy + r*Math.sin(a)];
+/* 漩涡轨迹的常数只跟几何有关（源位、目标位、画布中心），与进度 e 无关 ——
+   原来每个粒子每帧都重算一次 sqrt + atan2，6.6 万粒子就是每帧 26 万次三角函数，
+   实测单帧 15.2ms，光这一项就把 60fps 的 16.7ms 预算吃掉九成。改成每份动画数据只算一次。 */
+let vortexFor=null, vortexConst=null;
+function vortexOf(){
+  if(vortexFor===animData && vortexConst) return vortexConst;
+  const {AW,AH,N,srcX,srcY,tgtX,tgtY}=animData;
+  const cx=AW/2, cy=AH/2, Rmax=Math.sqrt(cx*cx+cy*cy)||1;
+  const th0=new Float32Array(N), dth=new Float32Array(N);
+  const r0=new Float32Array(N), dr=new Float32Array(N), wind=new Float32Array(N);
+  for(let i=0;i<N;i++){
+    const sx=srcX[i]-cx, sy=srcY[i]-cy;      // 向量 源-中心
+    const tx=tgtX[i]-cx, ty=tgtY[i]-cy;      // 向量 目标-中心
+    const ra=Math.sqrt(sx*sx+sy*sy), rb=Math.sqrt(tx*tx+ty*ty);
+    const a0=Math.atan2(sy,sx);
+    let at=Math.atan2(ty,tx);
+    while(at-a0> Math.PI) at-=2*Math.PI;     // 取最短角差，避免绕远路
+    while(at-a0<-Math.PI) at+=2*Math.PI;
+    th0[i]=a0; dth[i]=at-a0;                 // 角度：a0 → a0+dth
+    r0[i]=ra;  dr[i]=rb-ra;                  // 半径：r0 → r0+dr
+    wind[i]=ra/Rmax;                         // 0(中心)..1(边缘)：外圈多转
   }
-  // 粒子飞移：直线从自拍原位到奶娃目标位
-  return [srcX[i]+(tgtX[i]-srcX[i])*e, srcY[i]+(tgtY[i]-srcY[i])*e];
+  vortexConst={cx,cy,th0,dth,r0,dr,wind};
+  vortexFor=animData;
+  return vortexConst;
 }
 // 绘制某一进度 t 的动画帧：只画粒子，背景透明，无任何底层。
 // 平滑处理：① 全部粒子同步运动（无分波次，避免「冻结前沿」造成的跳变）；
@@ -2261,17 +2278,31 @@ function particlePos(i, e, mode){
 //    网格模式用 3×3；两端一律 1px 精确，保证 t=0 是原照片、t=1 是精确重排结果；
 // ③ 无落位闪烁，整体连贯流动。
 function drawAnim(t){
-  const {AW,AH,N,colR,colG,colB,dstR,dstG,dstB}=animData;
-  const mode=animMode;
+  const {AW,AH,N,colR,colG,colB,dstR,dstG,dstB,srcX,srcY,tgtX,tgtY}=animData;
   const d=animImg.data; d.fill(0);                     // 透明：无底层背景
   const e=easeInOut(t);                               // 全局统一缓动，所有粒子同步
   const moving = (t>0.02 && t<0.98);                  // 仅飞行途中扩大覆盖，端点保持精确
   const exact = pixelExact;
+  // 漩涡：sin(πe) 每帧只算一次，粒子侧只剩「查表 + 插值 + 一次 cos/sin」
+  const v = (animMode==='vortex') ? vortexOf() : null;
+  const spinK = v ? Math.PI*2.2*Math.sin(Math.PI*e) : 0;
+  const cx = v ? v.cx : 0, cy = v ? v.cy : 0;
   for(let i=0;i<N;i++){
-    const pos=particlePos(i,e,mode);
-    let gx=Math.round(pos[0]), gy=Math.round(pos[1]);
-    if(gx<0)gx=0; else if(gx>=AW)gx=AW-1;
-    if(gy<0)gy=0; else if(gy>=AH)gy=AH-1;
+    let px, py;
+    if(v){
+      // 漩涡（差速螺旋）：每个粒子各自绕中心螺旋移动，旋转量随其到中心的半径增大，
+      // 外圈转得多、内圈转得少 → 黑洞吸入的漩涡感，而非整图刚性旋转。两端精确落位。
+      const a=v.th0[i]+e*v.dth[i]+spinK*v.wind[i];
+      const rr=v.r0[i]+e*v.dr[i];
+      px=cx+rr*Math.cos(a); py=cy+rr*Math.sin(a);
+    }else{
+      // 粒子飞移：直线从自拍原位到奶娃目标位
+      px=srcX[i]+(tgtX[i]-srcX[i])*e;
+      py=srcY[i]+(tgtY[i]-srcY[i])*e;
+    }
+    // 取整 + 夹边一步做完（Math.round 对负数和 (x+0.5)|0 在夹边后结果一致）
+    const gx = px<0 ? 0 : (px>=AW ? AW-1 : ((px+0.5)|0));
+    const gy = py<0 ? 0 : (py>=AH ? AH-1 : ((py+0.5)|0));
     const r=Math.round(colR[i]+(dstR[i]-colR[i])*e);
     const g=Math.round(colG[i]+(dstG[i]-colG[i])*e);
     const b=Math.round(colB[i]+(dstB[i]-colB[i])*e);
@@ -2282,18 +2313,20 @@ function drawAnim(t){
       // 逐像素：2×2 填补（粒子数=像素数，用 3×3 会过度膨胀、糊掉细节）
       for(let dy=0;dy<2;dy++){
         const yy=gy+dy; if(yy>=AH) continue;
+        const row=yy*AW*4;
         for(let dx=0;dx<2;dx++){
           const xx=gx+dx; if(xx>=AW) continue;
-          const o=(yy*AW+xx)*4; d[o]=r; d[o+1]=g; d[o+2]=b; d[o+3]=255;
+          const o=row+xx*4; d[o]=r; d[o+1]=g; d[o+2]=b; d[o+3]=255;
         }
       }
     } else {
-      // 网格：3×3 重叠覆盖，消除空洞
+      // 网格：3×3 重叠覆盖，消除空洞（行首地址提到内层循环外，少一次乘法）
       for(let dy=-1;dy<=1;dy++){
         const yy=gy+dy; if(yy<0||yy>=AH) continue;
+        const row=yy*AW*4;
         for(let dx=-1;dx<=1;dx++){
           const xx=gx+dx; if(xx<0||xx>=AW) continue;
-          const o=(yy*AW+xx)*4; d[o]=r; d[o+1]=g; d[o+2]=b; d[o+3]=255;
+          const o=row+xx*4; d[o]=r; d[o+1]=g; d[o+2]=b; d[o+3]=255;
         }
       }
     }
@@ -2568,32 +2601,22 @@ async function kcPermSeed(K){
   return v;
 }
 
-/* 两个视觉参数由密钥派生，不再让用户拖：
-   同一个密钥恒定同一组值（可复现、换人解也一样），换密钥就换一组。 */
+/* 两个视觉参数由密钥派生：色块消除 1–21%、色彩浓度 100–120%，
+   同一个密钥恒定同一组值（可复现、换人解也一样），换密钥就换一组。
+   界面上不再显示这两项 —— 用户调不了，也不必知道具体数值，规则只留在这里。 */
 function kcLookOf(seed){
   const a=kcMulberry((seed^0x7f4a7c15)>>>0)();
   const b=kcMulberry((seed^0x51ed270b)>>>0)();
   return { deblock: 1+Math.floor(a*21), sat: 100+Math.floor(b*21) };   // 1–21% / 100–120%
-}
-function kcShowLook(look){
-  const has=!!look;
-  roDeblock.classList.toggle('on',has); roSat.classList.toggle('on',has);
-  eDeblockVal.textContent=has?look.deblock:'—';
-  eSatVal.textContent=has?look.sat:'—';
-  eDeblockBar.style.width=has?((look.deblock-1)/20*100).toFixed(1)+'%':'0';
-  eSatBar.style.width=has?((look.sat-100)/20*100).toFixed(1)+'%':'0';
 }
 
 let encSrcImg=null, encSrcBytes=null, encSrcName='original.png';
 let encKeyRaw='', encBusy=false, encDirty=false, encDlURL='';
 const encInput=$('encInput'), encDrop=$('encDrop'), encMsg=$('encMsg'), encGo=$('encGo');
 const encReroll=$('encReroll'), encCanvas=$('encCanvas'), encEmptyTip=$('encEmptyTip');
-const encSrcPrev=$('encSrcPrev'), encSrcPh=$('encSrcPh'), encSrcMsg=$('encSrcMsg');
+const encSrcPrev=$('encSrcPrev'), encSrcPh=$('encSrcPh');
 const keyCard=$('keyCard'), keyVal=$('keyVal'), keyCopy=$('keyCopy'), encDl=$('encDl');
 const eBw=$('eBw'), eBwVal=$('eBwVal');
-const eDeblockVal=$('eDeblockVal'), eSatVal=$('eSatVal');
-const eDeblockBar=$('eDeblockBar'), eSatBar=$('eSatBar');
-const roDeblock=$('roDeblock'), roSat=$('roSat');
 
 function kcSay(el, text, bad){ if(!el) return; el.textContent=text; el.style.color = bad ? '#ff7a7a' : ''; }
 
@@ -2633,9 +2656,10 @@ function encTakeFile(f){
     const fr=new FileReader();
     fr.onload=()=>{
       encSrcBytes=new Uint8Array(fr.result);
-      kcSay(encSrcMsg,'「'+encSrcName+'」'+(f.size/1048576).toFixed(2)+' MB · 按原始字节加密',false);
+      // 原来这行文件信息挂在左小图下面，左小图现在不可点了，也就没那一行了 ——
+      // 并进卡片里的状态行，文件名和体积照样能看到。
+      kcSay(encMsg,'「'+encSrcName+'」'+(f.size/1048576).toFixed(2)+' MB · 按原始字节加密，点「加密重组」。',false);
       encGo.disabled=false;
-      kcSay(encMsg,'好了，点「加密重组」。',false);
     };
     fr.onerror=()=>kcSay(encMsg,'文件读取失败',true);
     fr.readAsArrayBuffer(f);
@@ -2662,7 +2686,6 @@ async function encRun(forceNewKey){
 
     const seed=await kcPermSeed(K);
     const look=kcLookOf(seed);
-    kcShowLook(look);
     const c=document.createElement('canvas'); c.width=W; c.height=H;
     const cx=c.getContext('2d');
     cx.fillStyle='#fff'; cx.fillRect(0,0,W,H);
@@ -2727,8 +2750,8 @@ async function encRun(forceNewKey){
     keyStagger();
     encGo.textContent='按这个密钥重新生成';
     encReroll.disabled=false;
-    kcSay(encMsg,'已生成 '+(bytes.length/1048576).toFixed(2)+' MB 的加密图（色块消除 '+look.deblock+
-      '%、色彩浓度 '+look.sat+'%）。图和密钥分两条路发出去 —— 只发图，对方拿到的就是一张普通奶娃图。',false);
+    // 密钥派生的色块/浓度不再报给用户（界面上已经没有这两项了），值只留在 look 里参与成像
+    kcSay(encMsg,'已生成 '+(bytes.length/1048576).toFixed(2)+' MB 的加密图。图和密钥分两条路发出去 —— 只发图，对方拿到的就是一张普通奶娃图。',false);
     revealResult(encCanvas);
   }catch(e){
     kcSay(encMsg,'生成失败：'+(e&&e.message||e),true);
@@ -2822,6 +2845,7 @@ restoreBtn.addEventListener('click',async()=>{
       const url=URL.createObjectURL(new Blob([raw]));
       restorePrev.src=url; restorePrev.style.display='block';
       restoreEmptyTip.style.display='none';
+      restorePrev.parentElement.classList.add('has-img');
       restoreDl.href=url; restoreDl.download=name;
       restoreBox.style.display='block';
       kcSay(restoreMsg,'已还原「'+name+'」，完整性校验通过。',false);
@@ -2837,6 +2861,7 @@ restoreBtn.addEventListener('click',async()=>{
       const url=URL.createObjectURL(blob);
       restorePrev.src=url; restorePrev.style.display='block';
       restoreEmptyTip.style.display='none';
+      restorePrev.parentElement.classList.add('has-img');
       restoreDl.href=url; restoreDl.download='restored-'+Date.now()+'.png';
       restoreBox.style.display='block';
       kcSay(restoreMsg,'已还原 1 张图（'+back.W+'×'+back.H+'），可下载查看。',false);
@@ -2922,19 +2947,18 @@ if(VIEW_IDS[_initView]){
   go(_initView,false);
 }
 
-// 首屏先让开场动画跑起来，奶娃图的像素分析排到空闲时段
-if(window.requestIdleCallback) requestIdleCallback(ensureBaby,{timeout:1500});
-else setTimeout(ensureBaby,150);
-
-// 顺手把 AudioContext 也建好：建 context 本身要 ~100ms，放在点击那一下会卡掉动画第一帧。
-// 无手势也能建，只是 suspended；等真点奶娃时在手势里 resume 就行。
+/* 三件预热（奶娃图分析 / AudioContext / 大笑音效）一律排在开场动画之后。
+   原来它们挂在 idle 回调上，1.5s / 2.5s / 3s 触发，正好全落在 4.6 秒的开场里：
+   奶娃图分析 ~300ms（trace 里那条 idle 回调单次 363ms）、建 AudioContext ~100ms、
+   119KB base64 音效解码也要一两百毫秒 —— 三下都压在圣光和天使旋转上，就是"一进去就卡"。
+   开场期间根本用不到它们；中途进工作页的话 go() 会立刻调 ensureBaby 补上。 */
+const idleRun=(fn,ms)=>{ if(window.requestIdleCallback) requestIdleCallback(fn,{timeout:ms}); else setTimeout(fn,ms); };
+const WARM_AT=5200;                                   // 开场 4.6s + 收尾
+setTimeout(()=>idleRun(ensureBaby,2000), WARM_AT);
+// AudioContext 提前建好是为了不在点击那一下卡掉动画第一帧（无手势也能建，只是 suspended）
 const warmAudio=()=>{ try{ audio(); }catch(e){} };
-if(window.requestIdleCallback) requestIdleCallback(warmAudio,{timeout:2500});
-else setTimeout(warmAudio,600);
-
-// 音效也排到空闲：这时首屏动画已经跑起来了，多这 119KB 下载不影响观感
-if(window.requestIdleCallback) requestIdleCallback(warmSfx,{timeout:3000});
-else setTimeout(warmSfx,900);
+setTimeout(()=>idleRun(warmAudio,2000), WARM_AT+400);
+setTimeout(()=>idleRun(warmSfx,2000), WARM_AT+800);
 
 /* ── 侧栏那只眼睛：瞳孔始终朝着鼠标 ──
    算法就三步：眼睛中心 → 鼠标的向量 / 归一化 → 乘以视线能偏出去的最大距离。

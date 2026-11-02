@@ -9,6 +9,8 @@ const art = {
   __LAUGH_ART__: read('_art/laugh.webp', 'image/webp'),
   __FACE_ART__: read('_art/face.webp', 'image/webp'),
   __ANGEL_ART__: read('_art/angel.webp', 'image/webp'),   // 开场降临用的天使形态
+  // 背景那层「30px 高斯 + 调色」已经预烘焙成图（见 .bg 注释），运行时不再走 filter
+  __BG_BLUR__: read('_art/bg-blur.webp', 'image/webp'),
   // 5 秒大笑音效（用户素材裁出来的那段），base64 内嵌，保证单文件拷走也有声
   __LAUGH_AUDIO__: read('audio/laugh.mp3', 'audio/mpeg'),
 };
